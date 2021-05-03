@@ -21,19 +21,11 @@ env:
     - NODE_VERSION="12"
     - CDN_PREFIX: https://static.developers.redhat.com/che/theia_artifacts/
     - MONACO_CDN_PREFIX: https://cdn.jsdelivr.net/npm/
-
-jobs:
-  include:
-    - stage: Build and publish images
-      script:
-      # Build image
-      - docker image prune -a -f 
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
-    - stage: Set-up npmjs auth token
-      script:
-      - printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-    - stage: Publish packages to npmjs
-      script:
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
-      - yarn publish:next
+script:
+  # Build image
+  - docker image prune -a -f 
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+  - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
+  - printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
+  - yarn publish:next
