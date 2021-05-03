@@ -1,6 +1,6 @@
 branches:
   only:
-  - master
+  - travis
 
 language: java
 
@@ -25,9 +25,8 @@ jobs:
     - stage: Build and publish images
       script:
         # Build image
-        - docker image prune -a -f
-        ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push
-        - docker tag ${DOCKERHUB}:${TRAVIS_COMMIT} ${DOCKERHUB}:latest
+        - docker image prune -a -f 
+	- ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     - stage: Set-up npmjs auth token
       script:
 	- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
