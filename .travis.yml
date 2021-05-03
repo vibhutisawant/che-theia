@@ -2,8 +2,8 @@ branches:
   only:
   - travis
 
-language: java
-
+node_js:
+  - 12
 
 os: linux
 dist: focal
