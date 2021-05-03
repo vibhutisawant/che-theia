@@ -1,6 +1,11 @@
 branches:
   only:
   - travis
+  
+language: node_js
+node_js:
+  - 12
+  
 services:
   - docker
 env:
@@ -51,7 +56,7 @@ script:
       docker image prune -a -f 
       echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
-      ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
+      #./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
    fi
