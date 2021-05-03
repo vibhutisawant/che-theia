@@ -10,7 +10,7 @@ os: linux
 dist: focal
 
 arch:
-  - amd64
+  - s390x
 
 services:
   - docker
