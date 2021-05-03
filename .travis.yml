@@ -2,10 +2,6 @@ branches:
   only:
   - travis
   
-language: node_js
-node_js:
-  - 12
-  
 services:
   - docker
 env:
