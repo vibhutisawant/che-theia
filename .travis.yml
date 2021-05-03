@@ -2,17 +2,6 @@ branches:
   only:
   - travis
 
-language: node_js
-node_js:
-  - 12
-
-os: linux
-dist: focal
-
-arch:
-  - s390x
-  - amd64
-
 services:
   - docker
 
@@ -21,7 +10,60 @@ env:
     - NODE_VERSION="12"
     - CDN_PREFIX: https://static.developers.redhat.com/che/theia_artifacts/
     - MONACO_CDN_PREFIX: https://cdn.jsdelivr.net/npm/
+  matrix: # targets for linux
+    - DIST=alpine
+    - DIST=ubi8
+	
+matrix:
+  include:
+    - os: linux
+      language: node_js
+      node_js: "12"
+	  arch:
+	    -s390x
+      - stage: Build
+	    script:
+		  -| 
+		   if [ "$TRAVIS_PULL_REQUEST" != "true" ] ;then
+		     yarn
+		   fi
+      - stage: Test Coverage	
+	    script:
+		  -| 
+		   if [ "$TRAVIS_PULL_REQUEST" != "true" ] ;then
+		    docker image prune -a -f
+            docker pull quay.io/eclipse/che-theia-dev:next
+            docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+            echo ${DIST}
+           #./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.${DIST}
+		   fi
+	
+	- os: linux
+      language: node_js
+      node_js: "12"
+	  arch:
+	    -amd64
+      - stage: Build
+	    script:
+		  -| 
+		   if [ "$TRAVIS_PULL_REQUEST" != "true" ] ;then
+		     yarn
+		   fi
+      - stage: Test Coverage	
+	    script:
+		  -| 
+		   if [ "$TRAVIS_PULL_REQUEST" != "true" ] ;then
+		    docker image prune -a -f
+            docker pull quay.io/eclipse/che-theia-dev:next
+            docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+            echo ${DIST}
+           #./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.${DIST}
+		   fi
+    
+
 script:
+  -|
+   if [ "$TRAVIS_PULL_REQUEST" != "false" ] ;then
   # Build image
   - docker image prune -a -f 
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -29,3 +71,4 @@ script:
   - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
   #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
   #- yarn publish:next
+  fi  
