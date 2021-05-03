@@ -9,7 +9,7 @@ os: linux
 dist: focal
 
 arch:
-  - s390x
+  - amd64
 
 services:
   - docker
@@ -29,10 +29,10 @@ jobs:
         ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push
         - docker tag ${DOCKERHUB}:${TRAVIS_COMMIT} ${DOCKERHUB}:latest
     - stage: Set-up npmjs auth token
-	  script:
-	    - printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-	- stage: Publish packages to npmjs
-	  script:
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-	    - yarn publish:next
+      script:
+	- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
+    - stage: Publish packages to npmjs
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+	- docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+	- yarn publish:next
