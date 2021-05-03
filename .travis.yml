@@ -27,7 +27,7 @@ matrix:
       script:
       - | 
        if [ "$TRAVIS_PULL_REQUEST" != "true" ] ;then
-        yarn
+        #yarn
         docker image prune -a -f
         docker pull quay.io/eclipse/che-theia-dev:next
         docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
@@ -42,21 +42,19 @@ matrix:
       script:
       - | 
        if [ "$TRAVIS_PULL_REQUEST" != "true" ] ;then
-         yarn
+         #yarn
          docker image prune -a -f
          docker pull quay.io/eclipse/che-theia-dev:next
          docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
          echo ${DIST}
          #./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.${DIST}
        fi
-script:
-  - |
-   if [ "$TRAVIS_PULL_REQUEST" != "false" ] ;then
-      # Build image
-      docker image prune -a -f 
-      echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+       if [ "$TRAVIS_PULL_REQUEST" != "false" ] ;then
+         # Build image
+         docker image prune -a -f 
+         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+         docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
       #./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
-   fi
+       fi
