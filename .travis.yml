@@ -1,27 +1,36 @@
-# Che-Theia workflow
-# matrix jobs with alpine and ubi8
-
 branches:
   only:
   - travis
-
 services:
   - docker
 
-os: linux
-dist: focal
+dist:
+  - alpine
+  - ubi8
 
-jobs:
+env:
+  global:
+    - NODE_VERSION: "12"
+    - CDN_PREFIX: https://static.developers.redhat.com/che/theia_artifacts/
+    - MONACO_CDN_PREFIX: https://cdn.jsdelivr.net/npm/
+
+matrix:
   include:
-    - stage: CI
-      name: linelint 
-      script: echo "Lint check"
-      
-    - stage: CI
-      name: node-build
-      script: echo "Node build"
-    
-    - stage: CI
-      name: docker-build
-      script:
-      - echo "Build on Matrix"
+    - os: linux
+      arch: amd64
+      language: node_js
+      node_js: "12"
+      if: type = pull_request
+      stage: CI Build
+      jobs:
+        include:
+          - dist: alpine
+            script:
+             #- yarn
+             #- docker image prune -a -f
+             #- docker pull quay.io/eclipse/che-theia-dev:next
+             #- docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+            - echo ${dist}
+          - dist: ubi8
+            script:
+            - echo ${dist}
