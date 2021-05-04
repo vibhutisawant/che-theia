@@ -19,22 +19,24 @@ jobs:
     - stage: Node Build
       arch: amd64
       os: linux
-    - name: Node Build(ubi8)
+    - name: Node Build
       arch: s390x
       os: linux
-    - stage: Docker Build(alpine)
+    - stage: Docker Build
+      name: alpine
       arch: amd64
       os: linux
       script: echo "Alpine job runs here"
-    - name: Docker Build(ubi8)
+    - name: alpine
+      arch: s390x
+      os: linux
+      script: echo "Alpine job runs here"
+    - stage: Docker build
+      name: ubi8
       arch: amd64
       os: linux
       script: echo "ubi8 job runs here"
-    - stage: Docker Build(alpine-s390x)
-      arch: s390x
-      os: linux
-      script: echo "Alpine job runs here"
-    - name: Docker Build(ubi8-s390x)
+    - name: ubi8
       arch: s390x
       os: linux
       script: echo "ubi8 job runs here"
