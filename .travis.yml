@@ -25,10 +25,3 @@ jobs:
       name: docker-build
       script:
       - echo "Build on Matrix"
-      jobs:
-        include:
-          - distro: alpine
-            script: 
-            - echo "Build for alpine"
-          - distro: ubi8
-            script: echo "Build for Ubi8"
