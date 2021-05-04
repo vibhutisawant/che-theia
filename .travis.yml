@@ -3,6 +3,7 @@ dist: focal
 language: node_js
 node_js: "12"
 
+
 #Normal node build 
 # matrix:
 #   include:
@@ -24,22 +25,18 @@ jobs:
     - stage: Docker Build(alpine)
       arch: amd64
       os: linux
-      dist: alpine
       script: echo "Alpine job runs here"
     - name: Docker Build(ubi8)
       arch: amd64
       os: linux
-      dist: ubi8
       script: echo "ubi8 job runs here"
     - stage: Docker Build(alpine-s390x)
       arch: s390x
       os: linux
-      dist: alpine
       script: echo "Alpine job runs here"
     - name: Docker Build(ubi8-s390x)
       arch: s390x
       os: linux
-      dist: ubi8
       script: echo "ubi8 job runs here"
 
 
