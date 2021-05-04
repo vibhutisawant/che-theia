@@ -20,20 +20,26 @@ jobs:
     - stage: Node Build
       arch: amd64
       os: linux
+      script: yarn
     - 
       arch: arm64
       os: linux
+      script: yarn
     - 
       arch: ppc64le
       os: linux
+      script: yarn
     - 
       arch: s390x
       os: linux
+      script: yarn
     - stage: Docker Build
       name: alpine
       arch: amd64
       os: linux
-      script: echo "Alpine job runs here"
+      script: 
+      - echo "Alpine job runs here"
+      - echo ${name}
     - 
       arch: arm64
       os: linux
