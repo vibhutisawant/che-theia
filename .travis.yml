@@ -33,14 +33,14 @@ jobs:
       arch: amd64
       os: linux
       script: yarn
-    - name: Node Build #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
-      arch: arm64
-      os: linux
-      script: yarn
-    - name: Node Build
-      arch: ppc64le
-      os: linux
-      script: yarn
+    #- name: Node Build #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
+    #  arch: arm64
+    #  os: linux
+    #  script: yarn
+    #- name: Node Build
+    #  arch: ppc64le
+    #  os: linux
+    #  script: yarn
     - name: Node Build
       arch: s390x
       os: linux
@@ -55,24 +55,24 @@ jobs:
       - docker pull quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
-    - 
-      arch: amd64
-      os: linux
-      script: 
-      - echo "Alpine job runs here"
-      - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
-    - 
-      arch: ppc64le
-      os: linux
-      script: 
-      - echo "Alpine job runs here"
-      - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
+    #- 
+    #  arch: arm64
+    #  os: linux
+    #  script: 
+    #  - echo "Alpine job runs here"
+    #  - docker image prune -a -f
+    #  - docker pull quay.io/eclipse/che-theia-dev:next
+    #  - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+    #  - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
+    #- 
+    #  arch: ppc64le
+    #  os: linux
+    #  script: 
+    #  - echo "Alpine job runs here"
+    #  - docker image prune -a -f
+    #  - docker pull quay.io/eclipse/che-theia-dev:next
+    #  - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+    #  - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     - 
       arch: s390x
       os: linux
@@ -92,24 +92,24 @@ jobs:
       - docker pull quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
-    - 
-      arch: arm64
-      os: linux
-      script: 
-      - echo "ubi8 job runs here"
-      - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
-    - 
-      arch: ppc64le
-      os: linux
-      script: 
-      - echo "ubi8 job runs here"
-      - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
+    # - 
+    #   arch: arm64
+    #   os: linux
+    #   script: 
+    #   - echo "ubi8 job runs here"
+    #   - docker image prune -a -f
+    #   - docker pull quay.io/eclipse/che-theia-dev:next
+    #   - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+    #   - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
+    # - 
+    #   arch: ppc64le
+    #   os: linux
+    #   script: 
+    #   - echo "ubi8 job runs here"
+    #   - docker image prune -a -f
+    #   - docker pull quay.io/eclipse/che-theia-dev:next
+    #   - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+    #   - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     - 
       arch: s390x
       os: linux
