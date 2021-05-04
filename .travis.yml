@@ -4,7 +4,7 @@ os: linux
 language: node_js
 node_js: "12"
 
-install: echo "Skip yarn --frozen-lockfile command"
+install: echo "Skip initial yarn --frozen=lockfile step" 
 #Docker build for alpine and ubi8
 jobs:
   include: 
