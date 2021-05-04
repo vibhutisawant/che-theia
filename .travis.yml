@@ -1,3 +1,6 @@
+# Che-Theia workflow
+# matrix jobs with alpine and ubi8
+
 dist: focal
 os: linux
 
@@ -5,6 +8,15 @@ language: node_js
 node_js: "12"
 
 install: echo "Skip initial yarn --frozen=lockfile step" 
+#Normal node build 
+# matrix:
+#   include:
+#     - arch: amd64
+#       os: linux
+
+#     - arch: s390x
+#       os: linux
+
 #Docker build for alpine and ubi8
 jobs:
   include: 
@@ -20,34 +32,28 @@ jobs:
     - stage: Node Build
       arch: amd64
       os: linux
-      script: yarn
-    - 
+    - name: Node Build
       arch: arm64
       os: linux
-      script: yarn
-    - 
+    - name: Node Build
       arch: ppc64le
       os: linux
-      script: yarn
-    - 
+    - name: Node Build
       arch: s390x
       os: linux
-      script: yarn
     - stage: Docker Build
       name: alpine
       arch: amd64
       os: linux
-      script: 
-      - echo "Alpine job runs here"
-      - echo ${name}
+      script: echo "Alpine job runs here"
     - 
-      arch: arm64
+      arch: amd64
       os: linux
-      script: echo "Alpine job runs here"      
+      script: echo "Alpine job runs here"
     - 
       arch: ppc64le
       os: linux
-      script: echo "Alpine job runs here"      
+      script: echo "Alpine job runs here"
     - 
       arch: s390x
       os: linux
@@ -69,3 +75,11 @@ jobs:
       arch: s390x
       os: linux
       script: echo "ubi8 job runs here"
+
+
+before_script:
+  - echo "Check for Lint"
+
+script:
+  - echo "Node build steps"
+  
