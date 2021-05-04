@@ -4,7 +4,7 @@ os: linux
 language: node_js
 node_js: "12"
 
-install: false
+install: true
 #Docker build for alpine and ubi8
 jobs:
   include: 
