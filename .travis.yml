@@ -1,4 +1,5 @@
 dist: focal
+os: linux
 
 language: node_js
 node_js: "12"
@@ -27,7 +28,7 @@ jobs:
       arch: amd64
       os: linux
       script: echo "Alpine job runs here"
-    - name: alpine
+    - 
       arch: s390x
       os: linux
       script: echo "Alpine job runs here"
@@ -36,7 +37,7 @@ jobs:
       arch: amd64
       os: linux
       script: echo "ubi8 job runs here"
-    - name: ubi8
+    - 
       arch: s390x
       os: linux
       script: echo "ubi8 job runs here"
