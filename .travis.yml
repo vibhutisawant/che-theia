@@ -4,7 +4,7 @@ os: linux
 language: node_js
 node_js: "12"
 
-install: export GO111MODULE="on" 
+install: echo "Skip initial yarn --frozen=lockfile step" 
 #Normal node build 
 # matrix:
 #   include:
@@ -22,7 +22,7 @@ jobs:
       os: linux
       env: STEP=LINT
       install: npm install eslint@4.7.x lerna
-      script:  echo "run lint here"
+      script: 'npm run lint && npm run lint_tests'
       addons:
         apt:
           packages: # avoid installing packages
