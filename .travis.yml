@@ -21,7 +21,7 @@ jobs:
       arch: amd64
       os: linux
       env: STEP=LINT
-      install: npm install eslint@4.7.x
+      install: npm install eslint@4.7.x lerna
       script: 'npm run lint && npm run lint_tests'
       addons:
         apt:
