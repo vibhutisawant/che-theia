@@ -17,6 +17,24 @@ node_js: "12"
 #Docker build for alpine and ubi8
 jobs:
   include: 
+    - stage: Linting 
+      arch: amd64
+      os: linux
+      env: STEP=LINT
+      install: npm install eslint@4.7.x
+      script: 'npm run lint && npm run lint_tests'
+      addons:
+        apt:
+          packages: # avoid installing packages
+    -
+      arch: s390x
+      os: linux
+      env: STEP=LINT
+      install: npm install eslint@4.7.x
+      script: 'npm run lint && npm run lint_tests'
+      addons:
+        apt:
+          packages: # avoid installing packages
     - stage: Node Build
       arch: amd64
       os: linux
