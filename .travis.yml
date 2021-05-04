@@ -23,11 +23,17 @@ jobs:
   include:
     - os: linux
       arch: amd64
+      language: node_js
+      node_js: "12"
+      stage: "Node-build"
       if: type != pull_request
       script: echo "Run yarn command here"
       
     - os: linux
       arch: s390x
+      language: node_js
+      node_js: "12"
+      stage: "Node-build"
       if: type != pull_request
       script: echo "Run yarn command here"
 
