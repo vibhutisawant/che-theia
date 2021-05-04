@@ -7,8 +7,25 @@ matrix:
   include:
     - arch: amd64
       os: linux
+      jobs:
+      include: 
+        - stage: Docker Build
+          dist: alpine
+          script: echo "Alpine job runs here"
+        - stage: Docker Build
+          dist: ubi8
+          script: echo "ubi8 job runs here"
+
     - arch: s390x
       os: linux
+      jobs:
+      include: 
+        - stage: Docker Build
+          dist: alpine
+          script: echo "Alpine job runs here"
+        - stage: Docker Build
+          dist: ubi8
+          script: echo "ubi8 job runs here"
 
 before_script:
   - echo "Check for Lint"
