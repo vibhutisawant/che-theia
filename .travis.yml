@@ -20,7 +20,7 @@ matrix:
       arch: amd64
       language: node_js
       node_js: "12"
-      if: type = pull_request
+      if: type != pull_request
       stage: CI Build
       jobs:
         include:
