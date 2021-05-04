@@ -1,8 +1,16 @@
 branches:
   only:
   - travis
+
 services:
   - docker
+
+language: node_js
+node_js: "12"
+
+arch:
+  - amd64
+  - s390x
 
 dist:
   - alpine
@@ -14,10 +22,41 @@ env:
     - CDN_PREFIX: https://static.developers.redhat.com/che/theia_artifacts/
     - MONACO_CDN_PREFIX: https://cdn.jsdelivr.net/npm/
 
+jobs:
+  include:
+    - os: linux
+      arch: amd64
+      if: type != pull_request
+      script: echo "Run yarn command here"
+      
+    - os: linux
+      arch: s390x
+      if: type != pull_request
+      script: echo "Run yarn command here"
+
 matrix:
   include:
     - os: linux
       arch: amd64
+      language: node_js
+      node_js: "12"
+      if: type != pull_request
+      stage: CI Build
+      jobs:
+        include:
+          - dist: alpine
+            script:
+             #- yarn
+             #- docker image prune -a -f
+             #- docker pull quay.io/eclipse/che-theia-dev:next
+             #- docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+            - echo ${dist}
+          - dist: ubi8
+            script:
+            - echo ${dist}
+
+    - os: linux
+      arch: s390x
       language: node_js
       node_js: "12"
       if: type != pull_request
