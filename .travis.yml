@@ -4,16 +4,7 @@ os: linux
 language: node_js
 node_js: "12"
 
-install: echo "Skip initial yarn --frozen=lockfile step" 
-#Normal node build 
-# matrix:
-#   include:
-#     - arch: amd64
-#       os: linux
-
-#     - arch: s390x
-#       os: linux
-
+install: false
 #Docker build for alpine and ubi8
 jobs:
   include: 
@@ -29,7 +20,13 @@ jobs:
     - stage: Node Build
       arch: amd64
       os: linux
-    - name: Node Build
+    - 
+      arch: arm64
+      os: linux
+    - 
+      arch: ppc64le
+      os: linux
+    - 
       arch: s390x
       os: linux
     - stage: Docker Build
@@ -37,6 +34,14 @@ jobs:
       arch: amd64
       os: linux
       script: echo "Alpine job runs here"
+    - 
+      arch: arm64
+      os: linux
+      script: echo "Alpine job runs here"      
+    - 
+      arch: ppc64le
+      os: linux
+      script: echo "Alpine job runs here"      
     - 
       arch: s390x
       os: linux
@@ -47,13 +52,14 @@ jobs:
       os: linux
       script: echo "ubi8 job runs here"
     - 
+      arch: arm64
+      os: linux
+      script: echo "ubi8 job runs here"
+    - 
+      arch: ppc64le
+      os: linux
+      script: echo "ubi8 job runs here"
+    - 
       arch: s390x
       os: linux
       script: echo "ubi8 job runs here"
-
-
-before_script:
-  - echo "Check for Lint"
-
-script:
-  - echo "Node build steps"
