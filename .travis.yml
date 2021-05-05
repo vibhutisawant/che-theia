@@ -54,11 +54,13 @@ jobs:
     #  os: linux
     #  script: yarn
     - name: Node Build
+      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: s390x
       os: linux
       script: yarn
     - stage: Docker Build
       name: alpine 
+      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: amd64
       os: linux
       script: 
@@ -68,6 +70,7 @@ jobs:
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     #- 
+    #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
     #  arch: arm64
     #  os: linux
     #  script: 
@@ -77,6 +80,7 @@ jobs:
     #  - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
     #  - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     #- 
+    #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
     #  arch: ppc64le
     #  os: linux
     #  script: 
@@ -86,6 +90,7 @@ jobs:
     #  - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
     #  - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     - 
+      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: s390x
       os: linux
       script: 
@@ -106,6 +111,7 @@ jobs:
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     # - 
+    #   if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
     #   arch: arm64
     #   os: linux
     #   script: 
@@ -115,6 +121,7 @@ jobs:
     #   - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
     #   - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     # - 
+    #   if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
     #   arch: ppc64le
     #   os: linux
     #   script: 
@@ -124,6 +131,7 @@ jobs:
     #   - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
     #   - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     - 
+      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: s390x
       os: linux
       script: 
@@ -149,6 +157,7 @@ jobs:
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
     - 
+      if: type = push AND branch = travis
       arch: s390x
       os: linux
       script:
@@ -167,3 +176,4 @@ before_script:
 
 script:
   - echo "Node build steps"
+  
