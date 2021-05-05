@@ -27,6 +27,7 @@ install: skip
 stages:
   - publish
   - Build & Publish 'next'
+  - Check a Theia branch
 
 jobs:
   include: 
@@ -46,10 +47,12 @@ jobs:
       os: linux
       script: yarn
     #- name: Node Build #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
+    #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
     #  arch: arm64
     #  os: linux
     #  script: yarn
     #- name: Node Build
+    #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
     #  arch: ppc64le
     #  os: linux
     #  script: yarn
@@ -93,6 +96,9 @@ jobs:
       if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: s390x
       os: linux
+      env:
+      - CDN_PREFIX: https://static.developers.redhat.com/che/theia_artifacts/
+      - MONACO_CDN_PREFIX: https://cdn.jsdelivr.net/npm/
       script: 
       - echo "Alpine job runs here"
       - docker image prune -a -f
@@ -104,6 +110,9 @@ jobs:
       name: ubi8
       arch: amd64
       os: linux
+      env:
+      - CDN_PREFIX: https://static.developers.redhat.com/che/theia_artifacts/
+      - MONACO_CDN_PREFIX: https://cdn.jsdelivr.net/npm/
       script: 
       - echo "ubi8 job runs here"
       - docker image prune -a -f
@@ -166,6 +175,18 @@ jobs:
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
+    - stage: Check a Theia branch
+      arch: amd64
+      os: linux
+      if: type = api
+      env: theia_github_repo = eclipse-theia/theia
+           theia_branch = master
+      script:
+      - docker image prune -a -f
+      - docker pull quay.io/eclipse/che-theia-dev:next
+      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${theia_github_repo} --branch:${theia_branch}
+
 
 after_success:
   # Upload code coverage results to codecov.io, see https://github.com/codecov/codecov-bash for more information
