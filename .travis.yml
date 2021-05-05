@@ -55,7 +55,7 @@ jobs:
       script: 
       - echo "Alpine job runs here"
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
+      - docker pull --cache-from quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     #- 
@@ -82,7 +82,7 @@ jobs:
       script: 
       - echo "Alpine job runs here"
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
+      - docker pull --cache-from quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     - stage: Docker build
@@ -92,7 +92,7 @@ jobs:
       script: 
       - echo "ubi8 job runs here"
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
+      - docker pull --cache-from quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     # - 
@@ -119,7 +119,7 @@ jobs:
       script: 
       - echo "ubi8 job runs here"
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
+      - docker pull --cache-from quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
 
