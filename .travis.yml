@@ -181,10 +181,11 @@ jobs:
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
     - stage: Check a Theia branch
+      if: type = api
       arch: amd64
       os: linux
-      if: type = api
-      install: skip
+      language: node_js
+      node_js: "12"
       script:
       - docker image prune -a -f
       - docker pull quay.io/eclipse/che-theia-dev:next
@@ -192,10 +193,11 @@ jobs:
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     - 
       name: Check a Theia branch
+      if: type = api
       arch: s390x
       os: linux
-      if: type = api
-      install: skip
+      language: node_js
+      node_js: "12"
       script:
       - docker image prune -a -f
       - docker pull quay.io/eclipse/che-theia-dev:next
