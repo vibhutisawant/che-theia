@@ -3,11 +3,12 @@
 
 dist: focal
 os: linux
+cache: yarn
 
 language: node_js
 node_js: "12"
 
-install: echo "Skip initial yarn --frozen=lockfile step" 
+install: skip
 #Normal node build 
 # matrix:
 #   include:
