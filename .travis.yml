@@ -29,6 +29,10 @@ stages:
   - Build & Publish 'next'
   - Check a Theia branch
 
+env: 
+  - THEIA_GITHUB_REPO: eclipse-theia/theia
+  - THEIA_BRANCH: master
+
 jobs:
   include: 
     - stage: Linting 
@@ -180,9 +184,6 @@ jobs:
       os: linux
       if: type = api
       install: skip
-      env: 
-      - THEIA_GITHUB_REPO: eclipse-theia/theia
-      - THEIA_BRANCH: master
       script:
       - docker image prune -a -f
       - docker pull quay.io/eclipse/che-theia-dev:next
