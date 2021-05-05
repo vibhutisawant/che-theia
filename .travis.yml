@@ -179,13 +179,14 @@ jobs:
       arch: amd64
       os: linux
       if: type = api
-      env: theia_github_repo = eclipse-theia/theia
-           theia_branch = master
+      env: 
+      - THEIA_GITHUB_REPO: eclipse-theia/theia
+      - THEIA_BRANCH: master
       script:
       - docker image prune -a -f
       - docker pull quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${theia_github_repo} --branch:${theia_branch}
+      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
 
 
 after_success:
