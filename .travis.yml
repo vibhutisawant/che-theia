@@ -10,7 +10,7 @@ git:
 language: node_js
 node_js: "12"
 
-install: skip
+#install: skip
 #Normal node build 
 # matrix:
 #   include:
