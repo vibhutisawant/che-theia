@@ -30,6 +30,7 @@ stages:
   - Check a Theia branch
 
 env: 
+  global:
   - THEIA_GITHUB_REPO: eclipse-theia/theia
   - THEIA_BRANCH: master
 
