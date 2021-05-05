@@ -21,10 +21,17 @@ install: skip
 #       os: linux
 
 #Docker build for alpine and ubi8
+
+
+
+stages:
+  - publish
+  - Build & Publish 'next'
+
 jobs:
   include: 
     - stage: Linting 
-      if: type != pull_request  # To be chnged later to =pr, marked != for testing purpose
+      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: amd64
       os: linux
       env: STEP=LINT
@@ -34,7 +41,7 @@ jobs:
         apt:
           packages: # avoid installing packages
     - stage: Node Build
-      if: type != pull_request  # To be chnged later to =pr, marked != for testing purpose
+      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: amd64
       os: linux
       script: yarn
@@ -88,7 +95,7 @@ jobs:
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     - stage: Docker build
-      if: type != pull_request  # To be chnged later to =pr, marked != for testing purpose
+      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       name: ubi8
       arch: amd64
       os: linux
@@ -131,23 +138,25 @@ jobs:
     #   env:
     #     - PROJECT=CoreCron METHOD=pod-lib-lint
     #   script:
-
-stages:
-  #- name: publish
-    # require the type to be push to master
-    #if: type = push AND branch = master
-    #env:
-    #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #script: ./.ci/publish-report.sh
-  - name: Build & Publish 'next'
-    # require the type to be push to master
-    if: type = push AND branch = travis
-    script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
-    - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
-    #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-    #- yarn publish:next
+    - stage: Build & Publish 'next'
+      if: type = push AND branch = travis
+      arch: amd64
+      os: linux
+      script:
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
+      #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
+      #- yarn publish:next
+    - 
+      arch: s390x
+      os: linux
+      script:
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
+      #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
+      #- yarn publish:next
 
 after_success:
   # Upload code coverage results to codecov.io, see https://github.com/codecov/codecov-bash for more information
