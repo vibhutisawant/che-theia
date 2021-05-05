@@ -24,6 +24,7 @@ install: skip
 jobs:
   include: 
     - stage: Linting 
+      if: type != pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: amd64
       os: linux
       env: STEP=LINT
@@ -33,6 +34,7 @@ jobs:
         apt:
           packages: # avoid installing packages
     - stage: Node Build
+      if: type != pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: amd64
       os: linux
       script: yarn
@@ -55,7 +57,7 @@ jobs:
       script: 
       - echo "Alpine job runs here"
       - docker image prune -a -f
-      - docker pull --cache-from quay.io/eclipse/che-theia-dev:next
+      - docker pull quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     #- 
@@ -82,17 +84,18 @@ jobs:
       script: 
       - echo "Alpine job runs here"
       - docker image prune -a -f
-      - docker pull --cache-from quay.io/eclipse/che-theia-dev:next
+      - docker pull quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     - stage: Docker build
+      if: type != pull_request  # To be chnged later to =pr, marked != for testing purpose
       name: ubi8
       arch: amd64
       os: linux
       script: 
       - echo "ubi8 job runs here"
       - docker image prune -a -f
-      - docker pull --cache-from quay.io/eclipse/che-theia-dev:next
+      - docker pull quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     # - 
@@ -119,14 +122,39 @@ jobs:
       script: 
       - echo "ubi8 job runs here"
       - docker image prune -a -f
-      - docker pull --cache-from quay.io/eclipse/che-theia-dev:next
+      - docker pull quay.io/eclipse/che-theia-dev:next
       - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
 
+    # - stage: publish
+    #   if: type = cron
+    #   env:
+    #     - PROJECT=CoreCron METHOD=pod-lib-lint
+    #   script:
 
+stages:
+  #- name: publish
+    # require the type to be push to master
+    #if: type = push AND branch = master
+    #env:
+    #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #script: ./.ci/publish-report.sh
+  - name: Build & Publish 'next'
+    # require the type to be push to master
+    if: type = push AND branch = travis
+    script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+    - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
+    #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
+    #- yarn publish:next
+
+after_success:
+  # Upload code coverage results to codecov.io, see https://github.com/codecov/codecov-bash for more information
+  #- bash <(curl -s https://codecov.io/bash) 
+  
 before_script:
   - echo "Check for Lint"
 
 script:
   - echo "Node build steps"
-  
