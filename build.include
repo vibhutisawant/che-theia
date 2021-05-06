@@ -84,11 +84,11 @@ buildImages() {
     GITHUB_TOKEN_ARG="GITHUB_TOKEN=${GITHUB_TOKEN:-}"
     echo "Building image in ${image_dir}"
      if [ "$image_dir" == "dockerfiles/theia" ]; then
-       bash $(pwd)/$image_dir/build.sh --build-args:${GITHUB_TOKEN_ARG},THEIA_VERSION=${THEIA_VERSION},THEIA_COMMIT_SHA=${THEIA_COMMIT_SHA},THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --tag:${IMAGE_TAG}-$1 --branch:${THEIA_BRANCH} --git-ref:${THEIA_GIT_REFS} ${FILTERED_ARGS} --organization="prabhav"
+       bash $(pwd)/$image_dir/build.sh --build-args:${GITHUB_TOKEN_ARG},THEIA_VERSION=${THEIA_VERSION},THEIA_COMMIT_SHA=${THEIA_COMMIT_SHA},THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --tag:${IMAGE_TAG}-$1 --branch:${THEIA_BRANCH} --git-ref:${THEIA_GIT_REFS} ${FILTERED_ARGS} --organization:"prabhav"
      elif [ "$image_dir" == "dockerfiles/theia-dev" ]; then
-       bash $(pwd)/$image_dir/build.sh --build-arg:${GITHUB_TOKEN_ARG} --tag:${IMAGE_TAG}-$1 ${FILTERED_ARGS} --organization="prabhav"
+       bash $(pwd)/$image_dir/build.sh --build-arg:${GITHUB_TOKEN_ARG} --tag:${IMAGE_TAG}-$1 ${FILTERED_ARGS} --organization:"prabhav"
      else
-       bash $(pwd)/$image_dir/build.sh --build-arg:${GITHUB_TOKEN_ARG} --tag:${IMAGE_TAG}-$1 ${FILTERED_ARGS} --organization="prabhav"
+       bash $(pwd)/$image_dir/build.sh --build-arg:${GITHUB_TOKEN_ARG} --tag:${IMAGE_TAG}-$1 ${FILTERED_ARGS} --organization:"prabhav"
      fi
      if [ $? -ne 0 ]; then
        echo "ERROR:"
