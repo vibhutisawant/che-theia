@@ -15,8 +15,8 @@ set -o pipefail
 parse "$@"
 yarn ${YARN_OPTS}
 
-buildImages $1
+buildImages
 
 if is_publish_images; then
-    publishImages $1
+    publishImages
 fi
