@@ -11,6 +11,7 @@
 . ./build.include
 set -e
 set -o pipefail
+echo $1
 
 parse "$@"
 yarn ${YARN_OPTS}
