@@ -10,29 +10,16 @@ git:
 language: node_js
 node_js: "12"
 
-#install: skip
-#Normal node build 
-# matrix:
-#   include:
-#     - arch: amd64
-#       os: linux
-
-#     - arch: s390x
-#       os: linux
-
-#Docker build for alpine and ubi8
-
-
-
 stages:
   - publish
   - Build & Publish 'next'
   - Check a Theia branch
+  - release
 
 env: 
   global:
-  - THEIA_GITHUB_REPO: eclipse-theia/theia
-  - THEIA_BRANCH: master
+  - THEIA_GITHUB_REPO = eclipse-theia/theia
+  - THEIA_BRANCH = master
 
 jobs:
   include: 
@@ -43,9 +30,6 @@ jobs:
       env: STEP=LINT
       install: npm install eslint@4.7.x lerna
       script: echo "Lintline step"
-      addons:
-        apt:
-          packages: # avoid installing packages
     - stage: Node Build
       if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: amd64
@@ -74,8 +58,8 @@ jobs:
       script: 
       - echo "Alpine job runs here"
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+      - docker pull quay.io/prabhav/che-theia-dev:next
+      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     #- 
     #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
@@ -84,8 +68,8 @@ jobs:
     #  script: 
     #  - echo "Alpine job runs here"
     #  - docker image prune -a -f
-    #  - docker pull quay.io/eclipse/che-theia-dev:next
-    #  - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+    #  - docker pull quay.io/prabhav/che-theia-dev:next
+    #  - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
     #  - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     #- 
     #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
@@ -94,21 +78,21 @@ jobs:
     #  script: 
     #  - echo "Alpine job runs here"
     #  - docker image prune -a -f
-    #  - docker pull quay.io/eclipse/che-theia-dev:next
-    #  - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+    #  - docker pull quay.io/prabhav/che-theia-dev:next
+    #  - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
     #  - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     - 
       if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
       arch: s390x
       os: linux
       env:
-      - CDN_PREFIX: https://static.developers.redhat.com/che/theia_artifacts/
-      - MONACO_CDN_PREFIX: https://cdn.jsdelivr.net/npm/
+      - CDN_PREFIX = https://static.developers.redhat.com/che/theia_artifacts/
+      - MONACO_CDN_PREFIX = https://cdn.jsdelivr.net/npm/
       script: 
       - echo "Alpine job runs here"
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+      - docker pull quay.io/prabhav/che-theia-dev:next
+      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     - stage: Docker build
       if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
@@ -116,13 +100,13 @@ jobs:
       arch: amd64
       os: linux
       env:
-      - CDN_PREFIX: https://static.developers.redhat.com/che/theia_artifacts/
-      - MONACO_CDN_PREFIX: https://cdn.jsdelivr.net/npm/
+      - CDN_PREFIX = https://static.developers.redhat.com/che/theia_artifacts/
+      - MONACO_CDN_PREFIX = https://cdn.jsdelivr.net/npm/
       script: 
       - echo "ubi8 job runs here"
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+      - docker pull quay.io/prabhav/che-theia-dev:next
+      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     # - 
     #   if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
@@ -131,8 +115,8 @@ jobs:
     #   script: 
     #   - echo "ubi8 job runs here"
     #   - docker image prune -a -f
-    #   - docker pull quay.io/eclipse/che-theia-dev:next
-    #   - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+    #   - docker pull quay.io/prabhav/che-theia-dev:next
+    #   - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
     #   - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     # - 
     #   if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
@@ -141,8 +125,8 @@ jobs:
     #   script: 
     #   - echo "ubi8 job runs here"
     #   - docker image prune -a -f
-    #   - docker pull quay.io/eclipse/che-theia-dev:next
-    #   - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+    #   - docker pull quay.io/prabhav/che-theia-dev:next
+    #   - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
     #   - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     - 
       if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
@@ -151,8 +135,8 @@ jobs:
       script: 
       - echo "ubi8 job runs here"
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+      - docker pull quay.io/prabhav/che-theia-dev:next
+      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
 
     # - stage: publish
@@ -167,7 +151,8 @@ jobs:
       script:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
+      - docker image prune -a -f
+      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
     - 
@@ -177,7 +162,8 @@ jobs:
       script:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine 
+      - docker image prune -a -f
+      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
     - stage: Check a Theia branch
@@ -188,8 +174,8 @@ jobs:
       node_js: "12"
       script:
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+      - docker pull quay.io/prabhav/che-theia-dev:next
+      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     - 
       name: Check a Theia branch
@@ -200,17 +186,48 @@ jobs:
       node_js: "12"
       script:
       - docker image prune -a -f
-      - docker pull quay.io/eclipse/che-theia-dev:next
-      - docker tag quay.io/eclipse/che-theia-dev:next eclipse/che-theia-dev:next
+      - docker pull quay.io/prabhav/che-theia-dev:next
+      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
 
+    - stage: Release
+      name: Check existing tags
+      if: type = api AND branch = master
+      arch: amd64
+      os: linux
+      language: node_js
+      node_js: "12"
+      script:
+      - |  
+        set +e
+        RECREATE_TAGS=${{ github.event.inputs.forceRecreateTags }}
+        VERSION=${{ github.event.inputs.version }}
+        EXISTING_TAG=$(git ls-remote --exit-code origin refs/tags/${VERSION})
+        if [[ -n ${EXISTING_TAG} ]]; then
+          if [[ ${RECREATE_TAGS} == "true" ]]; then
+            echo "[INFO] Removing tag for ${VERSION} version. New tag will be recreated during release."
+            git push origin :$VERSION
+          else
+            echo "[ERROR] Cannot proceed with release - tag ${EXISTING_TAG} already exists."
+            exit 1
+          fi
+        else
+          echo "[INFO] No existing tags detected for $VERSION"
+        fi
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+    -  
+      name: Prepare release
+      arch: amd64
+      os: linux
+      script:
+      - |  
+        git config --global user.name "Mykhailo Kuznietsov"
+        git config --global user.email "mkuznets@redhat.com"
+        export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+        export AKAMAI_CHE_AUTH=${{ secrets.AKAMAI_CHE_AUTH }}
+        ./make-release.sh --version ${{ github.event.inputs.version }}
 
-after_success:
+
   # Upload code coverage results to codecov.io, see https://github.com/codecov/codecov-bash for more information
   #- bash <(curl -s https://codecov.io/bash) 
-  
-before_script:
-  - echo "Check for Lint"
-
-script:
-  - echo "Node build steps"
