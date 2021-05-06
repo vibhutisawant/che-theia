@@ -10,6 +10,8 @@
 set -e
 set -u
 
+echo $1
+
 IMAGE_TAG="next"
 THEIA_GITHUB_REPO="eclipse-theia/theia"
 THEIA_VERSION="master"
@@ -65,10 +67,10 @@ DOCKER_FILES_LOCATIONS=(
 )
 
 PUBLISH_IMAGES_LIST=(
-  eclipse/che-theia-dev
-  eclipse/che-theia
-  eclipse/che-theia-endpoint-runtime-binary
-  eclipse/che-theia-vsix-installer
+  prabhav/che-theia-dev
+  prabhav/che-theia
+  prabhav/che-theia-endpoint-runtime-binary
+  prabhav/che-theia-vsix-installer
 )
 
 getImages() {
@@ -82,11 +84,11 @@ buildImages() {
     GITHUB_TOKEN_ARG="GITHUB_TOKEN=${GITHUB_TOKEN:-}"
     echo "Building image in ${image_dir}"
      if [ "$image_dir" == "dockerfiles/theia" ]; then
-       bash $(pwd)/$image_dir/build.sh --build-args:${GITHUB_TOKEN_ARG},THEIA_VERSION=${THEIA_VERSION},THEIA_COMMIT_SHA=${THEIA_COMMIT_SHA},THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --tag:${IMAGE_TAG} --branch:${THEIA_BRANCH} --git-ref:${THEIA_GIT_REFS} ${FILTERED_ARGS}
+       bash $(pwd)/$image_dir/build.sh --build-args:${GITHUB_TOKEN_ARG},THEIA_VERSION=${THEIA_VERSION},THEIA_COMMIT_SHA=${THEIA_COMMIT_SHA},THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --tag:${IMAGE_TAG}-$1 --branch:${THEIA_BRANCH} --git-ref:${THEIA_GIT_REFS} ${FILTERED_ARGS}
      elif [ "$image_dir" == "dockerfiles/theia-dev" ]; then
-       bash $(pwd)/$image_dir/build.sh --build-arg:${GITHUB_TOKEN_ARG} --tag:${IMAGE_TAG} ${FILTERED_ARGS}
+       bash $(pwd)/$image_dir/build.sh --build-arg:${GITHUB_TOKEN_ARG} --tag:${IMAGE_TAG}-$1 ${FILTERED_ARGS}
      else
-       bash $(pwd)/$image_dir/build.sh --build-arg:${GITHUB_TOKEN_ARG} --tag:${IMAGE_TAG} ${FILTERED_ARGS}
+       bash $(pwd)/$image_dir/build.sh --build-arg:${GITHUB_TOKEN_ARG} --tag:${IMAGE_TAG}-$1 ${FILTERED_ARGS}
      fi
      if [ $? -ne 0 ]; then
        echo "ERROR:"
@@ -101,17 +103,17 @@ publishImages() {
   for image in "${PUBLISH_IMAGES_LIST[@]}"
   do
     echo "Publishing ${image}:${IMAGE_TAG}..."
-    docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${IMAGE_TAG}"
-    echo y | docker push "${REGISTRY}/${image}:${IMAGE_TAG}"
+    docker tag "${image}:${IMAGE_TAG}-$1" "${REGISTRY}/${image}:${IMAGE_TAG}-$1"
+    echo y | docker push "${REGISTRY}/${image}:${IMAGE_TAG}-$1"
     if [[ -n "${THEIA_DOCKER_IMAGE_VERSION}" ]]; then
-      echo "Publishing ${image}:${THEIA_DOCKER_IMAGE_VERSION}..."
-      docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}"
-      echo y | docker push "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}"
+      echo "Publishing ${image}:${THEIA_DOCKER_IMAGE_VERSION}-$1..."
+      docker tag "${image}:${IMAGE_TAG}-$1" "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}-$1"
+      echo y | docker push "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}-$1"
     else
       SHORT_SHA=$(git rev-parse --short HEAD)
       echo "Publishing ${image}:${SHORT_SHA}..."
-      docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${SHORT_SHA}"
-      echo y | docker push "${REGISTRY}/${image}:${SHORT_SHA}"
+      docker tag "${image}:${IMAGE_TAG}-$1" "${REGISTRY}/${image}:${SHORT_SHA}-$1"
+      echo y | docker push "${REGISTRY}/${image}:${SHORT_SHA}-$1"
     fi
   done
 }
