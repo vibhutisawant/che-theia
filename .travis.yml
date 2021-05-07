@@ -10,6 +10,13 @@ git:
 language: node_js
 node_js: "12"
 
+before_install:
+  - sudo apt-get update -qq && apt-get install -y jq
+    # Docker login
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    # Log into Quay.io
+  - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+
 install: skip
 
 stages:
@@ -22,6 +29,7 @@ env:
   global:
   - THEIA_GITHUB_REPO = eclipse-theia/theia
   - THEIA_BRANCH = master
+  - TAG = next
 
 jobs:
   include: 
@@ -148,23 +156,22 @@ jobs:
       if: type = push AND branch = travis
       arch: amd64
       os: linux
-      script:
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      #- docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
-      #- docker image prune -a -f
-      #- ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push "${TRAVIS_CPU_ARCH}"
+      script: 
+      - docker image prune -a -f
+      - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
     - if: type = push AND branch = travis
       arch: s390x
       os: linux
       script:
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
       - docker image prune -a -f
       - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
+    - stage: Publish multiarch image with next tag
+      if: branch = travis AND env(TAG) = "next"
+      script: bash .travis/publish_multiarch.sh $TAG
     - stage: Check a Theia branch
       if: type = api
       arch: amd64
@@ -212,8 +219,6 @@ jobs:
         else
           echo "[INFO] No existing tags detected for $VERSION"
         fi
-        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
     - name: Prepare release
       if: type = api AND branch = master
       arch: amd64
