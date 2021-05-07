@@ -27,9 +27,9 @@ stages:
 
 env: 
   global:
-  - THEIA_GITHUB_REPO = eclipse-theia/theia
-  - THEIA_BRANCH = master
-  - TAG = next
+  - THEIA_GITHUB_REPO=eclipse-theia/theia
+  - THEIA_BRANCH=master
+  - TAG=next
 
 jobs:
   include: 
@@ -95,8 +95,8 @@ jobs:
       arch: s390x
       os: linux
       env:
-      - CDN_PREFIX = https://static.developers.redhat.com/che/theia_artifacts/
-      - MONACO_CDN_PREFIX = https://cdn.jsdelivr.net/npm/
+      - CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
+      - MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
       script: 
       - echo "Alpine job runs here"
       - docker image prune -a -f
@@ -109,8 +109,8 @@ jobs:
       arch: amd64
       os: linux
       env:
-      - CDN_PREFIX = https://static.developers.redhat.com/che/theia_artifacts/
-      - MONACO_CDN_PREFIX = https://cdn.jsdelivr.net/npm/
+      - CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
+      - MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
       script: 
       - echo "ubi8 job runs here"
       - docker image prune -a -f
@@ -194,7 +194,6 @@ jobs:
       - docker pull quay.io/prabhav/che-theia-dev:next
       - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
-
     - stage: Release
       name: Check existing tags
       if: type = api AND branch = master
@@ -235,8 +234,8 @@ jobs:
       arch: amd64
       os: linux
       env:
-        CDN_PREFIX = https://static.developers.redhat.com/che/theia_artifacts/
-        MONACO_CDN_PREFIX = https://cdn.jsdelivr.net/npm/
+        CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
+        MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
       script:
       - docker image prune -a -f
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
