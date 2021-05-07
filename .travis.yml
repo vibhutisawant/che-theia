@@ -20,165 +20,83 @@ before_install:
 install: skip
 
 stages:
+  - name: PR Check
+    if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
   - publish
-  - Build & Publish 'next'
+  - name: Build & Publish 'next'
+    if: type = push AND branch = travis
   - Check a Theia branch
-  - release
+  - Release
 
 env: 
   global:
   - THEIA_GITHUB_REPO=eclipse-theia/theia
   - THEIA_BRANCH=master
   - TAG=next
+  - CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
+  - MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
 
 jobs:
   include: 
-    - stage: Linting 
-      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
+    - stage: PR Check
+      name: Linting 
       arch: amd64
-      os: linux
       env: STEP=LINT
       install: npm install eslint@4.7.x lerna
       script: echo "Lintline step"
-    - stage: Node Build
-      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
+    - &node-build
+      name: Node Build
       arch: amd64
-      os: linux
       script: yarn
-    #- name: Node Build #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
-    #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-    #  arch: arm64
-    #  os: linux
-    #  script: yarn
-    #- name: Node Build
-    #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-    #  arch: ppc64le
-    #  os: linux
-    #  script: yarn
-    - name: Node Build
-      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-      arch: s390x
-      os: linux
-      script: yarn
-    - stage: Docker Build
-      name: alpine 
-      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-      arch: amd64
-      os: linux
-      script: 
-      - echo "Alpine job runs here"
-      - docker image prune -a -f
-      - docker pull quay.io/prabhav/che-theia-dev:next
-      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
-    #- 
-    #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-    #  arch: arm64
-    #  os: linux
-    #  script: 
-    #  - echo "Alpine job runs here"
-    #  - docker image prune -a -f
-    #  - docker pull quay.io/prabhav/che-theia-dev:next
-    #  - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-    #  - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
-    #- 
-    #  if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-    #  arch: ppc64le
-    #  os: linux
-    #  script: 
-    #  - echo "Alpine job runs here"
-    #  - docker image prune -a -f
-    #  - docker pull quay.io/prabhav/che-theia-dev:next
-    #  - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-    #  - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
-    - if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-      arch: s390x
-      os: linux
-      env:
-      - CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
-      - MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
-      script: 
-      - echo "Alpine job runs here"
-      - docker image prune -a -f
-      - docker pull quay.io/prabhav/che-theia-dev:next
-      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
-    - stage: Docker build
-      if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-      name: ubi8
-      arch: amd64
-      os: linux
-      env:
-      - CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
-      - MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
-      script: 
-      - echo "ubi8 job runs here"
-      - docker image prune -a -f
-      - docker pull quay.io/prabhav/che-theia-dev:next
-      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
-    # - 
-    #   if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
+    # - <<: *node-build
+    #   name: Node Build on arm64 #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
     #   arch: arm64
-    #   os: linux
-    #   script: 
-    #   - echo "ubi8 job runs here"
-    #   - docker image prune -a -f
-    #   - docker pull quay.io/prabhav/che-theia-dev:next
-    #   - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-    #   - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
-    # - 
-    #   if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-    #   arch: ppc64le
-    #   os: linux
-    #   script: 
-    #   - echo "ubi8 job runs here"
-    #   - docker image prune -a -f
-    #   - docker pull quay.io/prabhav/che-theia-dev:next
-    #   - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-    #   - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
-    - if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
+    - <<: *node-build
+      name: Node Build on ppc64le
+      arch: ppc64le
+    - <<: *node-build
+      name: Node Build on s390x
       arch: s390x
-      os: linux
+    - &docker-build-alpine
+      name: Docker Build(Alpine)
+      arch: amd64
+      script: 
+      - echo "Alpine Docker builds"
+      - bash .travis/publish_multiarch.sh ${TRAVIS_CPU_ARCH} alpine
+    # - <<: *docker-build-alpine
+    #   arch: arm64
+    - <<: *docker-build-alpine
+      arch: ppc64le
+    - <<: *docker-build-alpine
+      arch: s390x
+    - &docker-build-ubi8
+      name: Docker build(ubi8)
+      arch: amd64
       script: 
       - echo "ubi8 job runs here"
-      - docker image prune -a -f
-      - docker pull quay.io/prabhav/che-theia-dev:next
-      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
+      - bash .travis/publish_multiarch.sh ${TRAVIS_CPU_ARCH} ubi8
+    # - <<: *docker-build-ubi8
+    #   arch: arm64
+    - <<: *docker-build-ubi8
+      arch: ppc64le
+    - <<: *docker-build-ubi8
+      arch: s390x
 
-    # - stage: publish
-    #   if: type = cron
-    #   env:
-    #     - PROJECT=CoreCron METHOD=pod-lib-lint
-    #   script:
-    - stage: Build & Publish 'next'
-      if: type = push AND branch = travis
+    - &build-and-push-next
+      stage: Build & Publish 'next'
       arch: amd64
-      os: linux
       script: 
       - docker image prune -a -f
       - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
-    - if: type = push AND branch = travis
+    # - <<: *build-and-push-next
+    #   arch: arm64
+    - <<: *build-and-push-next
       arch: ppc64le
-      os: linux
-      script:
-      - docker image prune -a -f
-      - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-      #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-      #- yarn publish:next
-    - if: type = push AND branch = travis
+    - <<: *build-and-push-next
       arch: s390x
-      os: linux
-      script:
-      - docker image prune -a -f
-      - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-      #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-      #- yarn publish:next
-    - stage: Publish multiarch image with next tag
-      if: branch = travis AND env(TAG) = "next"
+    - name: Publish multiarch image with next tag
       script: bash .travis/publish_multiarch.sh $TAG
     - stage: Check a Theia branch
       if: type = api
