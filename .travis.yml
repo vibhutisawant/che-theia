@@ -25,6 +25,8 @@ stages:
   - publish
   - name: Build & Publish 'next'
     if: type = push AND branch = travis
+  - name: Publish multiarch image with next tag
+    if: branch = travis AND env(TAG) = "next"
   - Check a Theia branch
   - Release
 
@@ -96,7 +98,8 @@ jobs:
       arch: ppc64le
     - <<: *build-and-push-next
       arch: s390x
-    - name: Publish multiarch image with next tag
+    - stage: Publish multiarch image with next tag
+      name: Publish multiarch image with next tag
       script: bash .travis/publish_multiarch.sh $TAG
     - stage: Check a Theia branch
       if: type = api
