@@ -1,6 +1,7 @@
 #!/bin/bash
 
 TAG=$1
+REGISTRY="quay.io"
 
 PUBLISH_IMAGES_LIST=(
   prabhav/che-theia-dev
@@ -15,8 +16,8 @@ for image in "${PUBLISH_IMAGES_LIST[@]}"
   do
     AMEND=""
     AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-amd64";
-    #AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-arm64";
-    #AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-ppc64le";
+    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-arm64";
+    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-ppc64le";
     AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-s390x";
 
     docker manifest create ${REGISTRY}/${image}:"${TAG}" $AMEND
