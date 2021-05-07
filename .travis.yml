@@ -162,14 +162,6 @@ jobs:
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
     - if: type = push AND branch = travis
-      arch: arm64
-      os: linux
-      script:
-      - docker image prune -a -f
-      - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-      #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-      #- yarn publish:next
-    - if: type = push AND branch = travis
       arch: ppc64le
       os: linux
       script:
