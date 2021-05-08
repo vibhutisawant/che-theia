@@ -122,11 +122,11 @@ jobs:
       - docker pull quay.io/prabhav/che-theia-dev:next
       - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
-    # - <<: *build-and-push-next
+    # - <<: *check-a-theia-branch
     #   arch: arm64
-    - <<: *build-and-push-next
+    - <<: *check-a-theia-branch
       arch: ppc64le
-    - <<: *build-and-push-next
+    - <<: *check-a-theia-branch
       arch: s390x
     - stage: Release
       name: Check existing tags
