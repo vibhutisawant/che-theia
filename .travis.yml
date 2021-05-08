@@ -103,9 +103,11 @@ jobs:
     - <<: *build-and-push-next
       arch: s390x
     - stage: Publish multiarch image with next tag
+      if: type = push AND branch = travis
       name: Publish multiarch image with next tag
       script: bash .travis/publish_multiarch.sh $TAG
     - stage: Publish packages to npmjs
+      if: type = push AND branch = travis
       name: Publish packages to npmjs
       script: 
       - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
