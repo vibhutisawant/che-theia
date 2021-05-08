@@ -28,6 +28,8 @@ stages:
     if: type = push AND branch = travis
   - name: Publish multiarch image with next tag
     if: branch = travis AND env(TAG) = "next"
+  - name: Publish packages to npmjs
+    if: type = push AND branch = travis
   - name: Check a Theia branch
     if: type = api
   - Release
@@ -92,8 +94,6 @@ jobs:
       script: 
       - docker image prune -a -f
       - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-      before_deploy: printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-      
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
     # - <<: *build-and-push-next
@@ -107,7 +107,6 @@ jobs:
       name: Publish multiarch image with next tag
       script: bash .travis/publish_multiarch.sh $TAG
     - stage: Publish packages to npmjs
-      if: type = push AND branch = travis
       name: Publish packages to npmjs
       script: 
       - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
