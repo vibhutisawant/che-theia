@@ -28,7 +28,8 @@ stages:
     if: type = push AND branch = travis
   - name: Publish multiarch image with next tag
     if: branch = travis AND env(TAG) = "next"
-  - Check a Theia branch
+  - name: Check a Theia branch
+    if: type = api
   - Release
 
 env: 
@@ -91,6 +92,8 @@ jobs:
       script: 
       - docker image prune -a -f
       - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+      before_deploy: printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
+      
       #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
       #- yarn publish:next
     # - <<: *build-and-push-next
@@ -102,10 +105,15 @@ jobs:
     - stage: Publish multiarch image with next tag
       name: Publish multiarch image with next tag
       script: bash .travis/publish_multiarch.sh $TAG
-    - stage: Check a Theia branch
-      if: type = api
+    - stage: Publish packages to npmjs
+      name: Publish packages to npmjs
+      script: 
+      - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
+      - yarn publish:next
+
+    - &check-a-theia-branch
+      stage: Check a Theia branch
       arch: amd64
-      os: linux
       language: node_js
       node_js: "12"
       script:
@@ -113,17 +121,12 @@ jobs:
       - docker pull quay.io/prabhav/che-theia-dev:next
       - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
-    - name: Check a Theia branch
-      if: type = api
+    # - <<: *build-and-push-next
+    #   arch: arm64
+    - <<: *build-and-push-next
+      arch: ppc64le
+    - <<: *build-and-push-next
       arch: s390x
-      os: linux
-      language: node_js
-      node_js: "12"
-      script:
-      - docker image prune -a -f
-      - docker pull quay.io/prabhav/che-theia-dev:next
-      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     - stage: Release
       name: Check existing tags
       if: type = api AND branch = master
