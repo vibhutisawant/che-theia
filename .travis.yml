@@ -1,7 +1,6 @@
 # Che-Theia workflow
 # matrix jobs with alpine and ubi8
 
-
 dist: focal
 os: linux
 cache: yarn
