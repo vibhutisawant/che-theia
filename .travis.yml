@@ -113,7 +113,7 @@ jobs:
     - stage: Publish packages to npmjs
       name: Publish packages to npmjs
       if: type = push AND branch = travis
-      before_install: npm i -g lerna
+      before_install: npm i -g lerna rimraf
       script: 
       - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
       - yarn publish:next
@@ -123,7 +123,6 @@ jobs:
       arch: amd64
       language: node_js
       node_js: "12"
-      before_install: npm i -g lerna
       script:
       - docker image prune -a -f
       - docker pull quay.io/prabhav/che-theia-dev:next
@@ -199,6 +198,7 @@ jobs:
     - stage: Publish packages to npmjs
       if: ${pushToNpmJs} == true AND type = api AND env(TAG) != "next"
       name: Publish packages to npmjs
+      before_install: npm i -g lerna rimraf
       script: 
       - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
       - yarn publish:next
