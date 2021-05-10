@@ -138,6 +138,7 @@ jobs:
     #Release Workflow
     - stage: Check existing tags
       name: Check existing tags
+      if: type = api AND env(TAG) != "next"
       arch: amd64
       os: linux
       language: node_js
@@ -161,7 +162,8 @@ jobs:
     - &prepare-release
       stage: Release Che Theia
       description: The version that is going to be released. Should be in format 7.y.z
-      name: Prepare release
+      name: Prepare release and build images
+      if: type = api AND env(TAG) != "next"
       arch: amd64
       os: linux
       script:
