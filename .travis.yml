@@ -121,7 +121,7 @@ jobs:
       - docker image prune -a -f
       - docker pull quay.io/prabhav/che-theia-dev:next
       - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
+      - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     # - <<: *check-a-theia-branch
     #   arch: arm64
     - <<: *check-a-theia-branch
@@ -129,6 +129,9 @@ jobs:
     - <<: *check-a-theia-branch
       arch: s390x
     - stage: Release
+      name: Release Che Theia
+      description: The version that is going to be released. Should be in format 7.y.z
+    -
       name: Check existing tags
       if: type = api AND branch = master
       arch: amd64
