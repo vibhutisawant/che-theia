@@ -32,7 +32,6 @@ stages:
     if: type = push AND branch = travis
   - name: Check a Theia branch
     if: type = api
-  - Release
 
 env: 
   global:
@@ -117,6 +116,7 @@ jobs:
       arch: amd64
       language: node_js
       node_js: "12"
+      before_install: npm i -g lerna
       script:
       - docker image prune -a -f
       - docker pull quay.io/prabhav/che-theia-dev:next
@@ -128,74 +128,3 @@ jobs:
       arch: ppc64le
     - <<: *check-a-theia-branch
       arch: s390x
-    - stage: Release
-      name: Release Che Theia
-      description: The version that is going to be released. Should be in format 7.y.z
-    -
-      name: Check existing tags
-      if: type = api AND branch = master
-      arch: amd64
-      os: linux
-      language: node_js
-      node_js: "12"
-      script:
-      - |  
-        set +e
-        RECREATE_TAGS=${{ github.event.inputs.forceRecreateTags }}
-        VERSION=${{ github.event.inputs.version }}
-        EXISTING_TAG=$(git ls-remote --exit-code origin refs/tags/${VERSION})
-        if [[ -n ${EXISTING_TAG} ]]; then
-          if [[ ${RECREATE_TAGS} == "true" ]]; then
-            echo "[INFO] Removing tag for ${VERSION} version. New tag will be recreated during release."
-            git push origin :$VERSION
-          else
-            echo "[ERROR] Cannot proceed with release - tag ${EXISTING_TAG} already exists."
-            exit 1
-          fi
-        else
-          echo "[INFO] No existing tags detected for $VERSION"
-        fi
-    - name: Prepare release
-      if: type = api AND branch = master
-      arch: amd64
-      os: linux
-      script:
-      - |  
-        git config --global user.name "Mykhailo Kuznietsov"
-        git config --global user.email "mkuznets@redhat.com"
-        export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-        export AKAMAI_CHE_AUTH=${{ secrets.AKAMAI_CHE_AUTH }}
-        ./make-release.sh --version ${{ github.event.inputs.version }}
-    - name: Build and publish images
-      if: type = api AND branch = master
-      arch: amd64
-      os: linux
-      env:
-        CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
-        MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
-      script:
-      - docker image prune -a -f
-      - ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-    - name: Set-up npmjs auth token
-      if: github.event.inputs.pushToNpmJs == true 
-      run: printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-    - name: Publish packages to npmjs
-      if: github.event.inputs.pushToNpmJs == true 
-      run: yarn publish:next
-
-      before_deploy:
-        - printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-      deploy:
-        provider: script
-        skip_cleanup: true
-        script: "yarn publish:next"
-        on:
-          tags: true
-    - stage: deploy
-      if: "(branch = master) AND (NOT (type IN (pull_request)))"
-      before_install:
-        - curl -o- -L https://yarnpkg.com/install.sh | bash
-        - export PATH="$HOME/.yarn/bin:$PATH"
-
-  # Upload code coverage results to codecov.io, see https://github.com/codecov/codecov-bash for more information
-  #- bash <(curl -s https://codecov.io/bash) 
