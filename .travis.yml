@@ -23,21 +23,17 @@ install: skip
 stages:
   - name: PR Check
     if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
-  - publish
   - name: Build & Publish 'next'
-    if: type = push AND branch = travis
-  - name: Publish multiarch image with next tag
-    if: branch = travis AND env(TAG) = "next"
-  - name: Publish packages to npmjs
     if: type = push AND branch = travis
   - name: Check a Theia branch
     if: type = api
-  - name: Check existing refs/tags/ , Release, Build and publish images, Publish multiarch image
+  - name: Check existing refs/tags/ 
     if: type = api AND env(TAG) != "next"
-  #- name: Release
-  #  if: type = api AND env(TAG) != "next"
-    
-
+  - name: Release
+    if: type = api AND env(TAG) != "next"
+  - name: Build and publish images
+    if: type = api AND env(TAG) != "next"
+          
 
 env: 
   global:
@@ -111,11 +107,12 @@ jobs:
     - <<: *build-and-push-next
       arch: s390x
     - stage: Publish multiarch image with next tag
-      if: type = push AND branch = travis
+      if: branch = travis AND env(TAG) = "next"
       name: Publish multiarch image with next tag
       script: bash .travis/publish_multiarch.sh $TAG
     - stage: Publish packages to npmjs
       name: Publish packages to npmjs
+      if: type = push AND branch = travis
       script: 
       - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
       - yarn publish:next
@@ -161,30 +158,43 @@ jobs:
         else
           echo "[INFO] No existing tags detected for $VERSION"
         fi
-    - stage: Release Che Theia
+    - &prepare-release
+      stage: Release Che Theia
       description: The version that is going to be released. Should be in format 7.y.z
       name: Prepare release
       arch: amd64
       os: linux
       script:
       - |  
-        git config --global user.name "Mykhailo Kuznietsov"
-        git config --global user.email "mkuznets@redhat.com"
         export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
         export AKAMAI_CHE_AUTH=""
-        ./make-release.sh --version ${TAG}
-    - stage: Build and publish images
-      name: Build and publish images
-      arch: amd64
-      os: linux
-      script:
-      - docker image prune -a -f
-      - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        ./make-release-sed.sh
+        docker image prune -a -f
+        ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+    - <<: *prepare-release
+      arch: arm64
+    - <<: *prepare-release
+      arch: ppc64le
+    - <<: *prepare-release
+      arch: s390x
     - stage: Publish multiarch image
       name: Publish multiarch image 
-      script: bash .travis/publish_multiarch.sh $TAG
+      if: type = api AND env(TAG) != "next" 
+      script: 
+      - bash .travis/publish_multiarch.sh $TAG
+
+    - stage: Tag release
+      name: Tag release and Notify
+      if: type = api AND env(TAG) != "next"
+      arch: amd64
+      script:
+      - |  
+        git config --global user.name "Mykhailo Kuznietsov"
+        git config --global user.email "mkuznets@redhat.com"
+        bash make-release.sh --version $TAG --tag-release $NO_COMMIT
+
     - stage: Publish packages to npmjs
-      if: ${pushToNpmJs} == true 
+      if: ${pushToNpmJs} == true AND type = api AND env(TAG) != "next"
       name: Publish packages to npmjs
       script: 
       - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
