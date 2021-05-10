@@ -32,6 +32,12 @@ stages:
     if: type = push AND branch = travis
   - name: Check a Theia branch
     if: type = api
+  - name: Check existing refs/tags/ , Release, Build and publish images, Publish multiarch image
+    if: type = api AND env(TAG) != "next"
+  #- name: Release
+  #  if: type = api AND env(TAG) != "next"
+    
+
 
 env: 
   global:
@@ -40,6 +46,9 @@ env:
   - TAG=next
   - CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
   - MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
+  - RECREATE_TAGS=false
+  - pushToNpmJs=true
+
 
 jobs:
   include: 
@@ -128,3 +137,66 @@ jobs:
       arch: ppc64le
     - <<: *check-a-theia-branch
       arch: s390x
+    
+    #Release Workflow
+    - stage: Check existing tags
+      name: Check existing tags
+      arch: amd64
+      os: linux
+      language: node_js
+      node_js: "12"
+      script:
+      - |  
+        set +e
+        VERSION=${TAG}
+        EXISTING_TAG=$(git ls-remote --exit-code origin refs/tags/${VERSION})
+        if [[ -n ${EXISTING_TAG} ]]; then
+          if [[ ${RECREATE_TAGS} == "true" ]]; then
+            echo "[INFO] Removing tag for ${VERSION} version. New tag will be recreated during release."
+            git push origin :$VERSION
+          else
+            echo "[ERROR] Cannot proceed with release - tag ${EXISTING_TAG} already exists."
+            exit 1
+          fi
+        else
+          echo "[INFO] No existing tags detected for $VERSION"
+        fi
+    - stage: Release Che Theia
+      description: The version that is going to be released. Should be in format 7.y.z
+      name: Prepare release
+      arch: amd64
+      os: linux
+      script:
+      - |  
+        git config --global user.name "Mykhailo Kuznietsov"
+        git config --global user.email "mkuznets@redhat.com"
+        export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
+        export AKAMAI_CHE_AUTH=""
+        ./make-release.sh --version ${TAG}
+    - stage: Build and publish images
+      name: Build and publish images
+      arch: amd64
+      os: linux
+      script:
+      - docker image prune -a -f
+      - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+    - stage: Publish multiarch image
+      name: Publish multiarch image 
+      script: bash .travis/publish_multiarch.sh $TAG
+    - stage: Publish packages to npmjs
+      if: ${pushToNpmJs} == true 
+      name: Publish packages to npmjs
+      script: 
+      - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
+      - yarn publish:next
+      after_success:
+       - |
+         echo "{\"text\":\":white_check_mark: Che Theia ${{ github.event.inputs.version }} has been released: https://quay.io/eclipse/che-theia-dev:${{ github.event.inputs.version }} https://quay.io/eclipse/che-theia:${{ github.event.inputs.version }} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${{ github.event.inputs.version }} https://quay.io/eclipse/che-theia-vsix-installer:${{ github.event.inputs.version }}\"}" > mattermost.json
+         echo mattermost.json
+      after_failure:
+       - |
+         echo "{\"text\":\":no_entry_sign: Che Theia ${{ github.event.inputs.version }} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
+         echo mattermost.json
+
+  # Upload code coverage results to codecov.io, see https://github.com/codecov/codecov-bash for more information
+  #- bash <(curl -s https://codecov.io/bash) 
