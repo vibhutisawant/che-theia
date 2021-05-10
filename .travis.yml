@@ -112,7 +112,7 @@ jobs:
     - stage: Publish packages to npmjs
       name: Publish packages to npmjs
       if: type = push AND branch = travis
-      before_install: npm i -g lerna rimraf
+      before_install: npm i -g lerna rimraf concurrently
       script: 
       - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
       - yarn publish:next
