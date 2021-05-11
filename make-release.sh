@@ -12,9 +12,6 @@
 
 NOCOMMIT=0
 
-git remote remove origin
-git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
-
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     '-v'|'--version') VERSION="$2"; shift 1;;
@@ -64,6 +61,66 @@ if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
   git checkout "${BRANCH}"
 fi
 
+apply_files_edits () {
+  THEIA_VERSION=$(curl --silent http://registry.npmjs.org/-/package/@theia/core/dist-tags | sed 's/.*"next":"\(.*\)".*/\1/')
+  if [[ ! ${THEIA_VERSION} ]] || [[ ${THEIA_VERSION} == \"Unauthorized\" ]]; then
+    echo "Failed to get Theia next version from npmjs.org. Try again."; echo
+    exit 1
+  fi
+
+  WS_CLIENT_VERSION=$(curl --silent http://registry.npmjs.org/-/package/@eclipse-che/workspace-client/dist-tags | sed 's/.*"latest":"\(.*\)".*/\1/')
+  if [[ ! ${WS_CLIENT_VERSION} ]] || [[ ${WS_CLIENT_VERSION} == \"Unauthorized\" ]]; then
+    echo "Failed to get @eclipse-che/workspace-client latest version from npmjs.org. Try again."; echo
+    exit 1
+  fi
+
+  WS_TELEMETRY_CLIENT_VERSION=$(curl --silent http://registry.npmjs.org/-/package/@eclipse-che/workspace-telemetry-client/dist-tags | sed 's/.*"latest":"\(.*\)".*/\1/')
+  if [[ ! ${WS_TELEMETRY_CLIENT_VERSION} ]] || [[ ${WS_TELEMETRY_CLIENT_VERSION} == \"Unauthorized\" ]]; then
+    echo "Failed to get @eclipse-che/workspace-telemetry-client latest version from npmjs.org. Try again."; echo
+    exit 1
+  fi
+
+  API_DTO_VERSION=$(curl --silent http://registry.npmjs.org/-/package/@eclipse-che/api/dist-tags | sed 's/.*"latest":"\(.*\)".*/\1/')
+  if [[ ! ${API_DTO_VERSION} ]] || [[ ${API_DTO_VERSION} == \"Unauthorized\" ]]; then
+    echo "Failed to get @eclipse-che/api latest version from npmjs.org. Try again."; echo
+    exit 1
+  fi
+
+  # update config for Che-Theia generator
+  sed_in_place -e "/checkoutTo:/s/master/${BRANCH}/" che-theia-init-sources.yml
+  sed_in_place -e "/checkoutTo:/s/master/${BRANCH}/" che-theia-init-sources.yml
+
+  # set the variables for building the images
+  sed_in_place -e "s/IMAGE_TAG=\"..*\"/IMAGE_TAG=\"latest\"/" build.include
+  sed_in_place -e "s/^THEIA_COMMIT_SHA=$/THEIA_COMMIT_SHA=\"${THEIA_VERSION##*.}\"/" build.include
+  sed_in_place -e "s/THEIA_DOCKER_IMAGE_VERSION=.*/THEIA_DOCKER_IMAGE_VERSION=\"${VERSION}\"/" build.include
+
+  for m in "extensions/*" "plugins/*"; do
+    PACKAGE_JSON="${m}"/package.json
+    # shellcheck disable=SC2086
+    sed_in_place -r -e "s/(\"version\": )(\".*\")/\1\"$VERSION\"/" ${PACKAGE_JSON}
+    # shellcheck disable=SC2086
+    sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" ${PACKAGE_JSON}
+  done
+
+  if [[ ${VERSION} == *".0" ]]; then
+    for m in "extensions/*" "plugins/*"; do
+      PACKAGE_JSON="${m}"/package.json
+      # shellcheck disable=SC2086
+      sed_in_place -r -e "/plugin-packager/!s/(\"@theia\/..*\": )(\"next\")/\1\"${THEIA_VERSION}\"/" ${PACKAGE_JSON}
+      # shellcheck disable=SC2086
+      sed_in_place -r -e "s/(\"@eclipse-che\/workspace-client\": )(\"latest\")/\1\"$WS_CLIENT_VERSION\"/" ${PACKAGE_JSON}
+      # shellcheck disable=SC2086
+      sed_in_place -r -e "s/(\"@eclipse-che\/workspace-telemetry-client\": )(\"latest\")/\1\"$WS_TELEMETRY_CLIENT_VERSION\"/" ${PACKAGE_JSON}
+      # shellcheck disable=SC2086
+      sed_in_place -r -e "s/(\"@eclipse-che\/api\": )(\"latest\")/\1\"$API_DTO_VERSION\"/" ${PACKAGE_JSON}
+    done
+
+    sed_in_place -e '$ a RUN cd ${HOME} \&\& tar zcf ${HOME}/theia-source-code.tgz theia-source-code' dockerfiles/theia/docker/ubi8/builder-clone-theia.dockerfile
+  fi
+}
+
+apply_files_edits
 
 # commit change into branch
 if [[ ${NOCOMMIT} -eq 0 ]]; then

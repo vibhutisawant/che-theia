@@ -157,17 +157,19 @@ jobs:
       arch: amd64
       os: linux
       script:
+      - git config --global user.name "Mykhailo Kuznietsov"
+      - git config --global user.email "mkuznets@redhat.com"
       - export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
       - export AKAMAI_CHE_AUTH=""
-      - bash make-release-sed.sh
+      - bash make-release.sh  --version $TAG $NO_COMMIT
       - docker image prune -a -f
       - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     # - <<: *prepare-release
     #   arch: arm64
-    - <<: *prepare-release
-      arch: ppc64le
-    - <<: *prepare-release
-      arch: s390x
+    # - <<: *prepare-release
+    #   arch: ppc64le
+    # - <<: *prepare-release
+    #   arch: s390x
     - stage: Publish multiarch image
       name: Publish multiarch image 
       if: type = api AND env(TAG) != "next" 
@@ -180,10 +182,7 @@ jobs:
       arch: amd64
       script:
       - |  
-        git config --global user.name "Mykhailo Kuznietsov"
-        git config --global user.email "mkuznets@redhat.com"
-        bash make-release.sh --version $TAG $NO_COMMIT
-
+        echo "Do nothing"
     - stage: Publish packages to npmjs
       if: ${pushToNpmJs} == true AND type = api AND env(TAG) != "next"
       name: Publish packages to npmjs
