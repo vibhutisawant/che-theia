@@ -25,7 +25,7 @@ stages:
   - name: Build & Publish 'next'
     if: type = push AND branch = travis
   - name: Check a Theia branch
-    if: type = api
+    if: type = cron # to be changed later
   - name: Check existing refs/tags/ 
     if: type = api AND env(TAG) != "next"
   - name: Release
