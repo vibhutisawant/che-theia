@@ -28,10 +28,6 @@ stages:
     if: type = cron # to be changed later
   - name: Check existing refs/tags/ 
     if: type = api AND env(TAG) != "next"
-  - name: Release
-    if: type = api AND env(TAG) != "next"
-  - name: Build and publish images
-    if: type = api AND env(TAG) != "next"
 
 env: 
   global:
@@ -161,12 +157,11 @@ jobs:
       arch: amd64
       os: linux
       script:
-      - |  
-        export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
-        export AKAMAI_CHE_AUTH=""
-        bash make-release-sed.sh
-        docker image prune -a -f
-        ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+      - export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
+      - export AKAMAI_CHE_AUTH=""
+      - bash make-release-sed.sh
+      - docker image prune -a -f
+      - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     # - <<: *prepare-release
     #   arch: arm64
     - <<: *prepare-release
