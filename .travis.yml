@@ -21,7 +21,7 @@ install: skip
 
 stages:
   - name: PR Check
-    if: type = pull_request  # To be chnged later to =pr, marked != for testing purpose
+    if: type = pull_request  #To be chnged later to =pr, marked != for testing purpose
   - name: Build & Publish 'next'
     if: type = push AND branch = travis
   - name: Check a Theia branch
