@@ -64,7 +64,6 @@ if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
   git checkout "${BRANCH}"
 fi
 
-apply_files_edits
 
 # commit change into branch
 if [[ ${NOCOMMIT} -eq 0 ]]; then

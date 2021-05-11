@@ -19,7 +19,6 @@ sed_in_place() {
   fi
 }
 
-apply_files_edits () {
   THEIA_VERSION=$(curl --silent http://registry.npmjs.org/-/package/@theia/core/dist-tags | sed 's/.*"next":"\(.*\)".*/\1/')
   if [[ ! ${THEIA_VERSION} ]] || [[ ${THEIA_VERSION} == \"Unauthorized\" ]]; then
     echo "Failed to get Theia next version from npmjs.org. Try again."; echo
@@ -76,4 +75,3 @@ apply_files_edits () {
 
     sed_in_place -e '$ a RUN cd ${HOME} \&\& tar zcf ${HOME}/theia-source-code.tgz theia-source-code' dockerfiles/theia/docker/ubi8/builder-clone-theia.dockerfile
   fi
-}
