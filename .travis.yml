@@ -32,7 +32,6 @@ stages:
     if: type = api AND env(TAG) != "next"
   - name: Build and publish images
     if: type = api AND env(TAG) != "next"
-          
 
 env: 
   global:
