@@ -58,6 +58,10 @@ jobs:
     - <<: *node-build
       name: Node Build on s390x
       arch: s390x
+    - 
+      name: Code Coverage Report
+      arch: amd64
+      script: bash <(curl -s https://codecov.io/bash) 
     - &docker-build-alpine
       name: Docker Build(Alpine)
       arch: amd64
