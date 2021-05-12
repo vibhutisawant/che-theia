@@ -150,15 +150,16 @@ jobs:
         else
           echo "[INFO] No existing tags detected for $VERSION"
         fi
-    - 
-      stage: Release Che Theia
-      name: Prepare release and build images
+    - stage: Release Che Theia on amd64
+      name: Prepare release and build images on amd64
       if: type = api AND env(TAG) != "next"
       arch: amd64
       os: linux
       script:
       - git config --global user.name "Mykhailo Kuznietsov"
       - git config --global user.email "mkuznets@redhat.com"
+      - git remote remove origin
+      - git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
       - export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
       - export AKAMAI_CHE_AUTH=""
       - bash make-release.sh  --version $TAG $NO_COMMIT
@@ -166,16 +167,18 @@ jobs:
       - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
       - if [ "${pushToNpmJs}" = true ]; then printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc && yarn publish:next fi;
     - &prepare-release
-      name: Prepare release and build images
+      stage: Release Che Theia on Other arch
+      name: Prepare release and build images on Other arch
       if: type = api AND env(TAG) != "next"
       #arch: arm64
       arch: ppc64le
       script: 
-      - VERSION=${TAG}
-      - BRANCH=${VERSION%.*}.x
-      - git checkout "${BRANCH}"
-      - docker image prune -a -f
-      - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+      - |
+        VERSION=${TAG}
+        BRANCH=${VERSION%.*}.x
+        git checkout "${BRANCH}"
+        docker image prune -a -f
+        ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     # - <<: *prepare-release
     #   arch: ppc64le
     - <<: *prepare-release
