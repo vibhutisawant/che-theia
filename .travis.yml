@@ -85,31 +85,30 @@ jobs:
     - <<: *docker-build-ubi8
       arch: s390x
 
-    - &build-and-push-next
-      stage: Build & Publish 'next'
+    - stage: Build & Publish 'next'
+      name: Build & Publish 'next' on amd64
       arch: amd64
       script: 
       - docker image prune -a -f
       - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-      #- printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
-      #- yarn publish:next
-    # - <<: *build-and-push-next
-    #   arch: arm64
-    - <<: *build-and-push-next
+      - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
+      - yarn publish:next
+    - &build-and-push-next
+      stage: Build & Publish 'next' 
+      name: Build & Publish 'next' on other arch
+      # arch: arm64
       arch: ppc64le
+      script: 
+      - docker image prune -a -f
+      - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+    # - <<: *build-and-push-next
+    #   arch: ppc64le
     - <<: *build-and-push-next
       arch: s390x
     - stage: Publish multiarch image with next tag
       if: type = push AND branch = travis
       name: Publish multiarch image with next tag
       script: bash .travis/publish_multiarch.sh $TAG
-    - stage: Publish packages to npmjs
-      name: Publish packages to npmjs
-      if: type = push AND branch = travis
-      before_install: npm i -g lerna rimraf concurrently
-      script: 
-      - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
-      - yarn publish:next
 
     - &check-a-theia-branch
       stage: Check a Theia branch
