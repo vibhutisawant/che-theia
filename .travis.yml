@@ -150,7 +150,7 @@ jobs:
         else
           echo "[INFO] No existing tags detected for $VERSION"
         fi
-    - &prepare-release
+    - 
       stage: Release Che Theia
       name: Prepare release and build images
       if: type = api AND env(TAG) != "next"
@@ -164,32 +164,27 @@ jobs:
       - bash make-release.sh  --version $TAG $NO_COMMIT
       - docker image prune -a -f
       - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-    # - <<: *prepare-release
-    #   arch: arm64
+      - if [ "${pushToNpmJs}" = true ]; then printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc && yarn publish:next fi;
+    - &prepare-release
+      name: Prepare release and build images
+      if: type = api AND env(TAG) != "next"
+      #arch: arm64
+      arch: ppc64le
+      script: 
+      - VERSION=${TAG}
+      - BRANCH=${VERSION%.*}.x
+      - git checkout "${BRANCH}"
+      - docker image prune -a -f
+      - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     # - <<: *prepare-release
     #   arch: ppc64le
-    # - <<: *prepare-release
-    #   arch: s390x
+    - <<: *prepare-release
+      arch: s390x
     - stage: Publish multiarch image
       name: Publish multiarch image 
       if: type = api AND env(TAG) != "next" 
       script: 
       - bash .travis/publish_multiarch.sh $TAG
-
-    - stage: Tag release
-      name: Tag release and Notify
-      if: type = api AND env(TAG) != "next"
-      arch: amd64
-      script:
-      - |  
-        echo "Do nothing"
-    - stage: Publish packages to npmjs
-      if: ${pushToNpmJs} == true AND type = api AND env(TAG) != "next"
-      name: Publish packages to npmjs
-      before_install: npm i -g lerna rimraf
-      script: 
-      - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
-      #- yarn publish:next
       after_success:
        - |
          echo "{\"text\":\":white_check_mark: Che Theia ${TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG} https://quay.io/eclipse/che-theia:${TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}\"}" > mattermost.json
