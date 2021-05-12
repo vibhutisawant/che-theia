@@ -165,7 +165,10 @@ jobs:
       - bash make-release.sh  --version $TAG $NO_COMMIT
       - docker image prune -a -f
       - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-      - if [ "${pushToNpmJs}" = true ]; then printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc && yarn publish:next fi;
+      - if [[ ${pushToNpmJs} == "true" ]]; then 
+           printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc 
+           yarn publish:next 
+        fi
     - &prepare-release
       stage: Release Che Theia on Other arch
       name: Prepare release and build images on Other arch
