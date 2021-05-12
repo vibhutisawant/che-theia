@@ -12,6 +12,9 @@
 
 NOCOMMIT=0
 
+git remote remove origin
+git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
+
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     '-v'|'--version') VERSION="$2"; shift 1;;
