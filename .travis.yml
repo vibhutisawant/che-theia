@@ -10,12 +10,10 @@ git:
 language: node_js
 node_js: "12"
 
-before_install:
+install:
   - sudo apt-get update -qq && sudo apt-get install -y jq
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
-
-install: skip
 
 stages:
   - name: PR Check
@@ -40,7 +38,6 @@ env:
 jobs:
   include: 
     - stage: PR Check
-      before_install: true
       name: Linting 
       arch: amd64
       env: STEP=LINT
