@@ -161,6 +161,8 @@ jobs:
       - git config --global user.email "mkuznets@redhat.com"
       - export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
       - export AKAMAI_CHE_AUTH=""
+      - git remote remove origin
+      - git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
       - bash make-release.sh  --version $TAG $NO_COMMIT
       - docker image prune -a -f
       - ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
