@@ -59,6 +59,7 @@ jobs:
     - 
       name: Code Coverage Report
       arch: amd64
+      install: skip
       script: bash <(curl -s https://codecov.io/bash) 
     - &docker-build-alpine
       name: Docker Build(Alpine)
