@@ -150,9 +150,8 @@ jobs:
         else
           echo "[INFO] No existing tags detected for $VERSION"
         fi
-    - 
-      stage: Release Che Theia
-      name: Prepare release and build images
+    - stage: Release Che Theia
+      name: Prepare release and build images for amd64
       if: type = api AND env(TAG) != "next"
       arch: amd64
       os: linux
@@ -173,7 +172,8 @@ jobs:
             yarn publish:next 
         fi
     - &prepare-release
-      name: Prepare release and build images
+      stage: Release che-theia for other arch
+      name: Prepare release and build images for other arch
       if: type = api AND env(TAG) != "next"
       #arch: arm64
       arch: ppc64le
