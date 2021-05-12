@@ -40,6 +40,7 @@ env:
 jobs:
   include: 
     - stage: PR Check
+      install: true
       name: Linting 
       arch: amd64
       env: STEP=LINT
