@@ -1,5 +1,5 @@
 {
-  "name": "@vibhutisawant/theia-remote-api",
+  "name": "@eclipse-che/theia-remote-api",
   "keywords": [
     "theia-extension"
   ],

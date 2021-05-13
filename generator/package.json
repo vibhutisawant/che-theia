@@ -1,5 +1,5 @@
 {
-  "name": "@vibhutisawant/theia-generator",
+  "name": "@eclipse-che/theia-generator",
   "version": "0.0.1",
   "description": "Eclipse Che - Theia tooling",
   "author": "Florent Benoit",
