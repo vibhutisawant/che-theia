@@ -1,9 +1,8 @@
 # Che-Theia workflow
-# matrix jobs with alpine and ubi8
 
 dist: focal
 os: linux
-cache: yarn
+
 git:
   depth: false 
 
@@ -11,19 +10,8 @@ language: node_js
 node_js: "12"
 
 install:
-  - sudo apt-get update -qq && sudo apt-get install -y jq
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
-
-stages:
-  - name: PR Check
-    if: type = pull_request  #To be chnged later to =pr, marked != for testing purpose
-  - name: Build & Publish 'next'
-    if: type = push AND branch = travis
-  - name: Check a Theia branch
-    if: env(THEIA_GITHUB_REPO) AND env(THEIA_BRANCH) # to be changed later
-  - name: Check existing refs/tags/ 
-    if: type = api AND env(TAG) != "next"
 
 env: 
   global:
@@ -31,35 +19,43 @@ env:
   - CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
   - MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
   - RECREATE_TAGS=false
-  - pushToNpmJs=true
+  - PUSH_TO_NPMJS=true 
 
 jobs:
   include: 
     - stage: PR Check
-      name: Linting
+      if: type = pull_request 
+      # check EOF newline
+      name: Linelint (eof-newline)
       arch: amd64
       cache: false
-      env: STEP=LINT
       install: skip
       script:
       - docker run -it -v $(pwd):/data fernandrone/linelint:0.0.5
     - 
-      name: Node Build
+      name: Node Build on amd64
+      if: type = pull_request 
       arch: amd64
       install: skip
       script: yarn
+      #Test Coverage Report
       after_success:
         - bash <(curl -s https://codecov.io/bash) 
     - &node-build
-      name: Node Build on ppc64le #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
-      arch: ppc64le
+      if: type = pull_request 
+      name: Node Build on arm64
+      arch: arm64
       install: skip
       script: yarn
+    - <<: *node-build
+      name: Node Build on ppc64le
+      arch: ppc64le
     - <<: *node-build
       name: Node Build on s390x
       arch: s390x
     - &docker-build-alpine
-      name: Docker Build(Alpine)
+      if: type = pull_request 
+      name: Docker build (Alpine)
       arch: amd64
       install: skip
       script:
@@ -68,14 +64,15 @@ jobs:
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
-    # - <<: *docker-build-alpine
-    #   arch: arm64
+    - <<: *docker-build-alpine
+      arch: arm64
     - <<: *docker-build-alpine
       arch: ppc64le
     - <<: *docker-build-alpine
       arch: s390x
     - &docker-build-ubi8
-      name: Docker build(ubi8)
+      if: type = pull_request 
+      name: Docker build (ubi8)
       arch: amd64
       install: skip
       script:
@@ -84,54 +81,60 @@ jobs:
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
-    # - <<: *docker-build-ubi8
-    #   arch: arm64
+    - <<: *docker-build-ubi8
+      arch: arm64
     - <<: *docker-build-ubi8
       arch: ppc64le
     - <<: *docker-build-ubi8
       arch: s390x
 
     - stage: Build & Publish 'next'
-      name: Build & Publish 'next' on amd64
+      name: Build & Publish image on amd64 
+      if: type = push AND branch = travis
       arch: amd64
       script: 
       - docker image prune -a -f
       - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-      - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
-      - yarn publish:next
+      #- printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
+      #- yarn publish:next
     - &build-and-push-next
-      stage: Build & Publish 'next' 
-      name: Build & Publish 'next' on other arch
-      # arch: arm64
-      arch: ppc64le
+      stage: Build & Publish 'next' on other archs
+      name: Build & Publish image on arm64
+      arch: arm64
       script: 
       - docker image prune -a -f
       - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-    # - <<: *build-and-push-next
-    #   arch: ppc64le
+    - <<: *build-and-push-next
+      arch: ppc64le
+      name: Build & Publish image on ppc64le
     - <<: *build-and-push-next
       arch: s390x
+      name: Build & Publish image on s390x
+
     - stage: Publish multiarch image with next tag
       if: type = push AND branch = travis
       name: Publish multiarch image with next tag
-      script: bash .travis/publish_multiarch.sh $TAG
+      script: bash .travis/publish_multiarch.sh
 
     - &check-a-theia-branch
       stage: Check a Theia branch
+      name: Build an image against Theia branch ${THEIA_BRANCH} on amd64
       arch: amd64
-      language: node_js
-      node_js: "12"
+      if: env(THEIA_GITHUB_REPO) AND env(THEIA_BRANCH)
       script:
       - docker image prune -a -f
       - docker pull quay.io/prabhav/che-theia-dev:next
       - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
-    # - <<: *check-a-theia-branch
-    #   arch: arm64
+    - <<: *check-a-theia-branch
+      arch: arm64
+      name: Build an image against Theia branch ${THEIA_BRANCH} on arm64
     - <<: *check-a-theia-branch
       arch: ppc64le
+      name: Build an image against Theia branch ${THEIA_BRANCH} on ppc64le
     - <<: *check-a-theia-branch
       arch: s390x
+      name: Build an image against Theia branch ${THEIA_BRANCH} on s390x
     
     #Release Workflow
     - stage: Check existing tags
@@ -155,8 +158,8 @@ jobs:
         else
           echo "[INFO] No existing tags detected for $VERSION"
         fi
-    - stage: Release Che Theia
-      name: Prepare release and build images for amd64
+    - stage: Release Che Theia on amd64
+      name: Prepare release and Build images 
       if: type = api AND env(TAG) != "next"
       arch: amd64
       os: linux
@@ -166,22 +169,21 @@ jobs:
         git config --global user.name "Mykhailo Kuznietsov"
         git config --global user.email "mkuznets@redhat.com"
         export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
-        export AKAMAI_CHE_AUTH=""
+        export AKAMAI_CHE_AUTH=${AKAMAI_CHE_AUTH}
         git remote remove origin
         git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
-        bash make-release.sh  --version $TAG $NO_COMMIT
+        bash make-release.sh  --version $TAG
         docker image prune -a -f
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-        # if [[ ${pushToNpmJs} == "true" ]]; then
+        # if [[ ${PUSH_TO_NPMJS} == "true" ]]; then
         #     printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
         #     yarn publish:next 
         # fi
     - &prepare-release
-      stage: Release che-theia for other arch
-      name: Prepare release and build images for other arch
+      stage: Release che-theia on other archs
+      name: Prepare release and Build image on arm64
       if: type = api AND env(TAG) != "next"
-      #arch: arm64
-      arch: ppc64le
+      arch: arm64
       script:
       - |  
         set +e
@@ -190,23 +192,23 @@ jobs:
         git checkout "${BRANCH}"
         docker image prune -a -f
         ./build.sh  --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-    # - <<: *prepare-release
-    #   arch: ppc64le
+    - <<: *prepare-release
+      arch: ppc64le
+      name: Prepare release and Build image on ppc64le
     - <<: *prepare-release
       arch: s390x
-    - stage: Publish multiarch image
-      name: Publish multiarch image 
+      name: Prepare release and Build image on s390x
+
+    - stage: Publish multiarch image with $TAG tag
       if: type = api AND env(TAG) != "next" 
       script: 
-      - bash .travis/publish_multiarch.sh $TAG
+      - bash .travis/publish_multiarch.sh
       after_success:
        - |
-         echo "{\"text\":\":white_check_mark: Che Theia ${TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG} https://quay.io/eclipse/che-theia:${TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}\"}" > mattermost.json
-         echo mattermost.json
+         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":white_check_mark: Che Theia ${TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG} https://quay.io/eclipse/che-theia:${TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}\"}" > mattermost.json
+         cat mattermost.json
          curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
       after_failure:
        - |
-         echo "{\"text\":\":no_entry_sign: Che Theia ${TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
-         echo mattermost.json
-  # Upload code coverage results to codecov.io, see https://github.com/codecov/codecov-bash for more information
-  #- bash <(curl -s https://codecov.io/bash) 
+         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
+         cat mattermost.json
