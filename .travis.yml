@@ -71,7 +71,7 @@ jobs:
         docker image prune -a -f
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-        ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
+        ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     # - <<: *docker-build-alpine
     #   arch: arm64
     - <<: *docker-build-alpine
@@ -87,7 +87,7 @@ jobs:
         docker image prune -a -f
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-        ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
+        ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     # - <<: *docker-build-ubi8
     #   arch: arm64
     - <<: *docker-build-ubi8
