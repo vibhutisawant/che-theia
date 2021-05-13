@@ -43,25 +43,20 @@ jobs:
       env: STEP=LINT
       install: npm install eslint@4.7.x lerna
       script: echo "Lintline step"
-    - &node-build
+    - 
       name: Node Build
       arch: amd64
       install: skip
       script: yarn
-    # - <<: *node-build
-    #   name: Node Build on arm64 #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
-    #   arch: arm64
-    - <<: *node-build
-      name: Node Build on ppc64le
+      after_success:
+        - bash <(curl -s https://codecov.io/bash) 
+    - &node-build
+      name: Node Build on ppc64le #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
       arch: ppc64le
+      script: yarn
     - <<: *node-build
       name: Node Build on s390x
       arch: s390x
-    - 
-      name: Code Coverage Report
-      arch: amd64
-      install: skip
-      script: bash <(curl -s https://codecov.io/bash) 
     - &docker-build-alpine
       name: Docker Build(Alpine)
       arch: amd64
