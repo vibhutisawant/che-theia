@@ -21,14 +21,12 @@ stages:
   - name: Build & Publish 'next'
     if: type = push AND branch = travis
   - name: Check a Theia branch
-    if: type = cron # to be changed later
+    if: env(THEIA_GITHUB_REPO) AND env(THEIA_BRANCH) # to be changed later
   - name: Check existing refs/tags/ 
     if: type = api AND env(TAG) != "next"
 
 env: 
   global:
-  - THEIA_GITHUB_REPO=eclipse-theia/theia
-  - THEIA_BRANCH=master
   - TAG=next
   - CDN_PREFIX=https://static.developers.redhat.com/che/theia_artifacts/
   - MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
