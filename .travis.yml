@@ -42,7 +42,7 @@ jobs:
       env: STEP=LINT
       install: skip
       script:
-      - docker run -it -v $(pwd):/data fernandrone/linelint
+      - docker run -it -v $(pwd):/data fernandrone/linelint:0.0.5
     - 
       name: Node Build
       arch: amd64
