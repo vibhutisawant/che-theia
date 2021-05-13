@@ -51,6 +51,7 @@ jobs:
     - &node-build
       name: Node Build on ppc64le #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
       arch: ppc64le
+      install: skip
       script: yarn
     - <<: *node-build
       name: Node Build on s390x
