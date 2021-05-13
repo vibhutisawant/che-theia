@@ -46,6 +46,7 @@ jobs:
     - &node-build
       name: Node Build
       arch: amd64
+      install: skip
       script: yarn
     # - <<: *node-build
     #   name: Node Build on arm64 #name is needed to be included everywhere or else yarn test is executed(default behaviour) 
@@ -64,9 +65,13 @@ jobs:
     - &docker-build-alpine
       name: Docker Build(Alpine)
       arch: amd64
-      script: 
-      - echo "Alpine Docker builds"
-      - bash .travis/publish_multiarch.sh ${TRAVIS_CPU_ARCH} alpine
+      install: skip
+      script:
+      - |
+        docker image prune -a -f
+        docker pull quay.io/prabhav/che-theia-dev:next
+        docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
+        ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     # - <<: *docker-build-alpine
     #   arch: arm64
     - <<: *docker-build-alpine
@@ -76,9 +81,13 @@ jobs:
     - &docker-build-ubi8
       name: Docker build(ubi8)
       arch: amd64
-      script: 
-      - echo "ubi8 job runs here"
-      - bash .travis/publish_multiarch.sh ${TRAVIS_CPU_ARCH} ubi8
+      install: skip
+      script:
+      - |
+        docker image prune -a -f
+        docker pull quay.io/prabhav/che-theia-dev:next
+        docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
+        ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     # - <<: *docker-build-ubi8
     #   arch: arm64
     - <<: *docker-build-ubi8
