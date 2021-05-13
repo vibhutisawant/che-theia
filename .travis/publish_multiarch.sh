@@ -1,6 +1,5 @@
 #!/bin/bash
 
-TAG=$1
 REGISTRY="quay.io"
 
 PUBLISH_IMAGES_LIST=(
