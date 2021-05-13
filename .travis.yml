@@ -39,8 +39,9 @@ jobs:
       name: Linting 
       arch: amd64
       env: STEP=LINT
-      install: npm install eslint@4.7.x lerna
-      script: echo "Lintline step"
+      install: skip
+      script:
+      - docker run -it -v $(pwd):/data fernandrone/linelint
     - 
       name: Node Build
       arch: amd64
