@@ -100,6 +100,7 @@ jobs:
     - &build-and-push-next
       stage: Build & Publish 'next' on other archs
       name: Build & Publish image on arm64
+      if: type = push AND branch = travis
       arch: arm64
       script: 
       - docker image prune -a -f
@@ -111,7 +112,7 @@ jobs:
       arch: s390x
       name: Build & Publish image on s390x
 
-    - stage: Publish multiarch image with next tag
+    - stage: Publish multiarch image with 'next' tag
       if: type = push AND branch = travis
       name: Publish multiarch image with next tag
       script: bash .travis/publish_multiarch.sh
