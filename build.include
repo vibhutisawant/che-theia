@@ -116,6 +116,9 @@ publishImages() {
       echo y | docker push "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}"
     else
       SHORT_SHA=$(git rev-parse --short HEAD)
+      if [[ -n $ARCH ]]; then
+         SHORT_SHA=$SHORT_SHA-$ARCH
+      fi
       echo "Publishing ${image}:${SHORT_SHA}..."
       docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${SHORT_SHA}"
       echo y | docker push "${REGISTRY}/${image}:${SHORT_SHA}"
