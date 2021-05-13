@@ -65,7 +65,7 @@ jobs:
         docker image prune -a -f
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-        ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
+        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
     # - <<: *docker-build-alpine
     #   arch: arm64
     - <<: *docker-build-alpine
@@ -81,7 +81,7 @@ jobs:
         docker image prune -a -f
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-        ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
+        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
     # - <<: *docker-build-ubi8
     #   arch: arm64
     - <<: *docker-build-ubi8
@@ -94,7 +94,7 @@ jobs:
       arch: amd64
       script: 
       - docker image prune -a -f
-      - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+      - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
       - printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
       - yarn publish:next
     - &build-and-push-next
@@ -104,7 +104,7 @@ jobs:
       arch: ppc64le
       script: 
       - docker image prune -a -f
-      - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+      - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     # - <<: *build-and-push-next
     #   arch: ppc64le
     - <<: *build-and-push-next
@@ -123,7 +123,7 @@ jobs:
       - docker image prune -a -f
       - docker pull quay.io/prabhav/che-theia-dev:next
       - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-      - ./build.sh ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
+      - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     # - <<: *check-a-theia-branch
     #   arch: arm64
     - <<: *check-a-theia-branch
@@ -169,7 +169,7 @@ jobs:
         git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
         bash make-release.sh  --version $TAG $NO_COMMIT
         docker image prune -a -f
-        ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
         # if [[ ${pushToNpmJs} == "true" ]]; then
         #     printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
         #     yarn publish:next 
@@ -187,7 +187,7 @@ jobs:
         BRANCH=${VERSION%.*}.x
         git checkout "${BRANCH}"
         docker image prune -a -f
-        ./build.sh  ${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        ./build.sh  --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     # - <<: *prepare-release
     #   arch: ppc64le
     - <<: *prepare-release
