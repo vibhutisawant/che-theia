@@ -21,17 +21,6 @@ env:
   - RECREATE_TAGS=false
   - PUSH_TO_NPMJS=true 
 
-stages:
-  - name: PR Check
-    if: type = pull_request  #To be chnged later to =pr, marked != for testing purpose
-  - name: Build & Publish 'next'
-    if: type = push AND branch = travis
-  - name: Check a Theia branch
-    if: env(THEIA_GITHUB_REPO) AND env(THEIA_BRANCH) # to be changed later
-  - name: Check existing refs/tags/ 
-    if: type = api AND env(TAG) != "next"
-
-
 jobs:
   include: 
     - stage: PR Check
@@ -100,7 +89,8 @@ jobs:
       arch: s390x
 
     - stage: Build & Publish 'next'
-      name: Build & Publish 'next' on amd64
+      name: Build & Publish image on amd64 
+      if: type = push AND branch = travis
       arch: amd64
       script: 
       - docker image prune -a -f
@@ -108,21 +98,25 @@ jobs:
       #- printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
       #- yarn publish:next
     - &build-and-push-next
-      stage: Build & Publish 'next' 
-      name: Build & Publish 'next' on other arch
-      # arch: arm64
-      arch: ppc64le
+      stage: Build & Publish 'next' on other archs
+      name: Build & Publish image on arm64
+      if: type = push AND branch = travis
+      arch: arm64
       script: 
       - docker image prune -a -f
       - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-    # - <<: *build-and-push-next
-    #   arch: ppc64le
+    - <<: *build-and-push-next
+      arch: ppc64le
+      name: Build & Publish image on ppc64le
     - <<: *build-and-push-next
       arch: s390x
-    - stage: Publish multiarch image with next tag
+      name: Build & Publish image on s390x
+
+    - stage: Publish multiarch image with 'next' tag
       if: type = push AND branch = travis
       name: Publish multiarch image with next tag
-      script: bash .travis/publish_multiarch.sh $TAG
+      script: bash .travis/publish_multiarch.sh
+
     - &check-a-theia-branch
       stage: Check a Theia branch
       name: Build an image against Theia branch on amd64
