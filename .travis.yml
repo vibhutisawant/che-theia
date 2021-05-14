@@ -42,8 +42,8 @@ jobs:
       after_success:
         - if [[ "TRAVIS_CPU_ARCH" = "amd64" ]] ; then bash <(curl -s https://codecov.io/bash); fi
     - <<: *node-build
-      name: Node Build on arm64
-      arch: arm64
+      name: Node Build on arm
+      arch: arm
     - <<: *node-build
       name: Node Build on ppc64le
       arch: ppc64le
@@ -63,8 +63,8 @@ jobs:
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.$DIST
     - <<: *docker-build
-      name: Docker build (Alpine) on arm64
-      arch: arm64
+      name: Docker build (Alpine) on arm
+      arch: arm
       env: DIST=alpine
     - <<: *docker-build
       name: Docker build (Alpine) on ppc64le
@@ -79,8 +79,8 @@ jobs:
       arch: amd64
       env: DIST=ubi8
     - <<: *docker-build
-      name: Docker build (ubi8) on arm64
-      arch: arm64
+      name: Docker build (ubi8) on arm
+      arch: arm
       env: DIST=ubi8
     - <<: *docker-build
       name: Docker build (ubi8) on ppc64le
@@ -102,9 +102,9 @@ jobs:
       #- yarn publish:next
     - &build-and-push-next
       stage: Build & Publish 'next' on other archs
-      name: Build & Publish image on arm64
+      name: Build & Publish image on arm
       if: type = push AND branch = travis
-      arch: arm64
+      arch: arm
       script: 
       - docker image prune -a -f
       - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
@@ -131,8 +131,8 @@ jobs:
       - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     - <<: *check-a-theia-branch
-      arch: arm64
-      name: Build an image against Theia branch on arm64
+      arch: arm
+      name: Build an image against Theia branch on arm
     - <<: *check-a-theia-branch
       arch: ppc64le
       name: Build an image against Theia branch on ppc64le
