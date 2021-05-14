@@ -119,7 +119,7 @@ jobs:
 
     - &check-a-theia-branch
       stage: Check a Theia branch
-      name: Build an image against Theia branch ${THEIA_BRANCH} on amd64
+      name: Build an image against Theia branch on amd64
       arch: amd64
       if: env(THEIA_GITHUB_REPO) AND env(THEIA_BRANCH)
       script:
@@ -129,13 +129,13 @@ jobs:
       - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     - <<: *check-a-theia-branch
       arch: arm64
-      name: Build an image against Theia branch ${THEIA_BRANCH} on arm64
+      name: Build an image against Theia branch on arm64
     - <<: *check-a-theia-branch
       arch: ppc64le
-      name: Build an image against Theia branch ${THEIA_BRANCH} on ppc64le
+      name: Build an image against Theia branch on ppc64le
     - <<: *check-a-theia-branch
       arch: s390x
-      name: Build an image against Theia branch ${THEIA_BRANCH} on s390x
+      name: Build an image against Theia branch on s390x
     
     #Release Workflow
     - stage: Check existing tags
@@ -200,7 +200,7 @@ jobs:
       arch: s390x
       name: Prepare release and Build image on s390x
 
-    - stage: Publish multiarch image with $TAG tag
+    - stage: Publish multiarch image 
       if: type = api AND env(TAG) != "next" 
       script: 
       - bash .travis/publish_multiarch.sh
@@ -213,3 +213,4 @@ jobs:
        - |
          echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
          cat mattermost.json
+         curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
