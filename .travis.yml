@@ -32,7 +32,7 @@ jobs:
       install: skip
       script:
       - docker run -it -v $(pwd):/data fernandrone/linelint:0.0.5
-    - 
+    - &node-build
       name: Node Build on amd64
       if: type = pull_request 
       arch: amd64
@@ -40,53 +40,56 @@ jobs:
       script: yarn
       #Test Coverage Report
       after_success:
-        - bash <(curl -s https://codecov.io/bash) 
-    - &node-build
-      if: type = pull_request 
+        - if [[ "TRAVIS_CPU_ARCH" = "amd64" ]] ; then bash <(curl -s https://codecov.io/bash); fi
+    - <<: *node-build
       name: Node Build on arm64
       arch: arm64
-      install: skip
-      script: yarn
     - <<: *node-build
       name: Node Build on ppc64le
       arch: ppc64le
     - <<: *node-build
       name: Node Build on s390x
       arch: s390x
-    - &docker-build-alpine
+    - &docker-build
       if: type = pull_request 
-      name: Docker build (Alpine)
+      name: Docker build (Alpine) on amd64
       arch: amd64
+      env: DIST=alpine
       install: skip
       script:
       - |
         docker image prune -a -f
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine
-    - <<: *docker-build-alpine
+        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.$DIST
+    - <<: *docker-build
+      name: Docker build (Alpine) on arm64
       arch: arm64
-    - <<: *docker-build-alpine
+      env: DIST=alpine
+    - <<: *docker-build
+      name: Docker build (Alpine) on ppc64le
       arch: ppc64le
-    - <<: *docker-build-alpine
+      env: DIST=alpine
+    - <<: *docker-build
+      name: Docker build (Alpine) on s390x
       arch: s390x
-    - &docker-build-ubi8
-      if: type = pull_request 
-      name: Docker build (ubi8)
+      env: DIST=alpine
+    - <<: *docker-build
+      name: Docker build (ubi8) on amd64
       arch: amd64
-      install: skip
-      script:
-      - |
-        docker image prune -a -f
-        docker pull quay.io/prabhav/che-theia-dev:next
-        docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.ubi8
-    - <<: *docker-build-ubi8
+      env: DIST=ubi8
+    - <<: *docker-build
+      name: Docker build (ubi8) on arm64
       arch: arm64
-    - <<: *docker-build-ubi8
+      env: DIST=ubi8
+    - <<: *docker-build
+      name: Docker build (ubi8) on ppc64le
       arch: ppc64le
-    - <<: *docker-build-ubi8
+      env: DIST=ubi8
+    - <<: *docker-build
+      name: Docker build (ubi8) on s390x
       arch: s390x
+      env: DIST=ubi8
 
     - stage: Build & Publish 'next'
       name: Build & Publish image on amd64 
