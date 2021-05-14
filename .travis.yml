@@ -2,7 +2,7 @@
 
 dist: focal
 os: linux
-
+cache: false
 git:
   depth: false 
 
