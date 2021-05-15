@@ -44,9 +44,10 @@ jobs:
       #Test Coverage Report
       after_success:
         - if [[ "TRAVIS_CPU_ARCH" = "amd64" ]] ; then bash <(curl -s https://codecov.io/bash); fi
-    # - <<: *node-build
-    #   name: Node Build on arm64
-    #   arch: arm64
+    - <<: *node-build
+      name: Node Build on arm64
+      arch: arm64-graviton2
+      virt: lxd
     - <<: *node-build
       name: Node Build on ppc64le
       #arch: ppc64le
@@ -66,10 +67,11 @@ jobs:
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.$DIST
-    # - <<: *docker-build
-    #   name: Docker build (Alpine) on arm64
-    #   arch: arm64
-    #   env: DIST=alpine
+    - <<: *docker-build
+      name: Docker build (Alpine) on arm64
+      arch: arm64-graviton2
+      virt: lxd
+      env: DIST=alpine
     - <<: *docker-build
       name: Docker build (Alpine) on ppc64le
       #arch: ppc64le
@@ -83,10 +85,11 @@ jobs:
       name: Docker build (ubi8) on amd64
       arch: amd64
       env: DIST=ubi8
-    # - <<: *docker-build
-    #   name: Docker build (ubi8) on arm64
-    #   arch: arm64
-    #   env: DIST=ubi8
+    - <<: *docker-build
+      name: Docker build (ubi8) on arm64
+      arch: arm64-graviton2
+      virt: lxd
+      env: DIST=ubi8
     - <<: *docker-build
       name: Docker build (ubi8) on ppc64le
       #arch: ppc64le
@@ -129,7 +132,7 @@ jobs:
       if: type = push AND branch = travis
       #arch: ppc64le
       arch: arm64-graviton2
-      virt: vm
+      virt: lxd
       #os: linux-ppc64le
       script: 
       - docker image prune -a -f
@@ -221,9 +224,10 @@ jobs:
       stage: Release che-theia on other archs
       name: Prepare release and Build image on arm64
       if: type = api AND env(TAG) != "next"
+      arch: arm64-graviton2
+      virt: lxd
       #arch: arm64
       #arch: ppc64le
-      os: linux-ppc64le
       script:
       - |  
         set +e
@@ -232,9 +236,10 @@ jobs:
         git checkout "${BRANCH}"
         docker image prune -a -f
         ./build.sh  --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-    # - <<: *prepare-release
-    #   arch: ppc64le
-    #   name: Prepare release and Build image on ppc64le
+    - <<: *prepare-release
+      #arch: ppc64le
+      os: linux-ppc64le
+      name: Prepare release and Build image on ppc64le
     - <<: *prepare-release
       arch: s390x
       name: Prepare release and Build image on s390x
