@@ -166,9 +166,10 @@ jobs:
       - docker pull quay.io/prabhav/che-theia-dev:next
       - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
       - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
-    # - <<: *check-a-theia-branch
-    #   arch: arm64
-    #   name: Build an image against Theia branch on arm64
+    - <<: *check-a-theia-branch
+      arch: arm64-graviton2
+      virt: lxd
+      name: Build an image against Theia branch on arm64
     - <<: *check-a-theia-branch
       #arch: ppc64le
       os: linux-ppc64le
