@@ -44,7 +44,8 @@ parse() {
       --arch:*)
         ARCH="${1#*:}"
         shift ;;
-
+        IMAGE_TAG=$IMAGE_TAG-$ARCH
+        echo $IMAGE_TAG
         
       *)
         FILTERED_ARGS="${FILTERED_ARGS} $1"
