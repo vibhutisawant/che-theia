@@ -43,8 +43,6 @@ parse() {
         shift ;;
       --arch:*)
         ARCH="${1#*:}"
-        IMAGE_TAG=$IMAGE_TAG-$ARCH
-        echo $IMAGE_TAG
         shift ;;
 
         
@@ -107,6 +105,10 @@ publishImages() {
   REGISTRY="quay.io"
   for image in "${PUBLISH_IMAGES_LIST[@]}"
   do
+    if [[ -n $ARCH ]]; then
+         IMAGE_TAG=$IMAGE_TAG-$ARCH
+         THEIA_DOCKER_IMAGE_VERSION=${THEIA_DOCKER_IMAGE_VERSION}-$ARCH
+    fi
     echo "Publishing ${image}:${IMAGE_TAG}..."
     docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${IMAGE_TAG}"
     echo y | docker push "${REGISTRY}/${image}:${IMAGE_TAG}"
