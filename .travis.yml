@@ -13,9 +13,6 @@ install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
 
-before_script:
-  - chmod +x .travis/*
-
 env: 
   global:
   - TAG=next
@@ -153,7 +150,7 @@ jobs:
     - stage: Publish multiarch image with 'next' tag
       if: type = push AND branch = travis
       name: Publish multiarch image with next tag
-      script: bash .travis/publish_multiarch.sh
+      script: .travis/publish_multiarch.sh
     #publish-built-in-extension-report
     - name: Publish Built In Extension Report
       if: type = push OR type = cron
@@ -221,7 +218,7 @@ jobs:
         export AKAMAI_CHE_AUTH=${AKAMAI_CHE_AUTH}
         git remote remove origin
         git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
-        bash make-release.sh  --version $TAG
+        ./make-release.sh  --version $TAG
         docker image prune -a -f
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
         # if [[ ${PUSH_TO_NPMJS} == "true" ]]; then
@@ -256,7 +253,7 @@ jobs:
     - stage: Publish multiarch image 
       if: type = api AND env(TAG) != "next" 
       script: 
-      - bash .travis/publish_multiarch.sh
+      - .travis/publish_multiarch.sh
       after_success:
        - |
          echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":white_check_mark: Che Theia ${TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG} https://quay.io/eclipse/che-theia:${TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}\"}" > mattermost.json

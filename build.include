@@ -105,14 +105,13 @@ publishImages() {
   REGISTRY="quay.io"
   for image in "${PUBLISH_IMAGES_LIST[@]}"
   do
-    if [[ -n $ARCH ]]; then
-         IMAGE_TAG=$IMAGE_TAG-$ARCH
-         THEIA_DOCKER_IMAGE_VERSION=${THEIA_DOCKER_IMAGE_VERSION}-$ARCH
-    fi
     echo "Publishing ${image}:${IMAGE_TAG}..."
     docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${IMAGE_TAG}"
     echo y | docker push "${REGISTRY}/${image}:${IMAGE_TAG}"
     if [[ -n "${THEIA_DOCKER_IMAGE_VERSION}" ]]; then
+      if [[ -n $ARCH ]]; then
+         THEIA_DOCKER_IMAGE_VERSION=${THEIA_DOCKER_IMAGE_VERSION}-$ARCH
+      fi
       echo "Publishing ${image}:${THEIA_DOCKER_IMAGE_VERSION}..."
       docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}"
       echo y | docker push "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}"
