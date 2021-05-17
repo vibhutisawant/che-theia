@@ -134,6 +134,7 @@ jobs:
       #arch: ppc64le
       arch: arm64-graviton2
       virt: vm
+      group: edge
       #os: linux-ppc64le
       script: 
       - docker image prune -a -f
