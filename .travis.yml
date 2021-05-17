@@ -103,6 +103,7 @@ jobs:
     - &happy-path
       name: happy-path (alpine, next)
       if: type = pull_request 
+      install: skip
       env: DIST=alpine CHECTL_CHANNEL=next MINIKUBE_VERSION=v1.18.1
       arch: amd64
       script: ./.travis/happy-path.sh
