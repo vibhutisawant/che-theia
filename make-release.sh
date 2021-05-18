@@ -9,7 +9,7 @@
 #
 
 # Release process automation script.
-
+set -x
 NOCOMMIT=0
 
 while [[ "$#" -gt 0 ]]; do
