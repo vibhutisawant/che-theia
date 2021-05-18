@@ -124,8 +124,8 @@ curl http://custom-devfile.$(minikube ip).nip.io/devfile.yaml
 echo "che-theia-meta.yaml content from http://custom-devfile.$(minikube ip).nip.io/che-theia-meta.yaml is:"
 curl http://custom-devfile.$(minikube ip).nip.io/che-theia-meta.yaml
 
-docker tag eclipse/che-theia:next local-che-theia:latest
-docker tag eclipse/che-theia-endpoint-runtime-binary:next local-che-theia-endpoint-runtime-binary:latest
+docker tag prabhav/che-theia:next local-che-theia:latest
+docker tag prabhav/che-theia-endpoint-runtime-binary:next local-che-theia-endpoint-runtime-binary:latest
 docker save -o che-theia-images.tar local-che-theia:latest local-che-theia-endpoint-runtime-binary:latest
 docker image prune -a -f
 eval $(minikube docker-env)
