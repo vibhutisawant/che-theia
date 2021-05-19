@@ -20,7 +20,6 @@ env:
   - MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/
   - RECREATE_TAGS=false
   - PUSH_TO_NPMJS=true 
-  - CHILD_CONCURRENCY="1"
 
 jobs:
   include: 
@@ -50,6 +49,8 @@ jobs:
     - <<: *node-build
       name: Node Build on ppc64le
       arch: ppc64le
+      script: 
+      - CHILD_CONCURRENCY=1 yarn
       #os: linux-ppc64le
     - <<: *node-build
       name: Node Build on s390x
@@ -152,7 +153,7 @@ jobs:
       script: .travis/publish_multiarch.sh
     # publish-built-in-extension-report
     - name: Publish Built In Extension Report
-      if: type = push OR type = cron
+      if: (type = push AND branch=travis) OR (type = cron AND branch=travis)
       arch: amd64
       script: 
         - export DATE_TIME=$(date +"%Y-%m-%d")
