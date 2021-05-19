@@ -143,6 +143,9 @@ jobs:
       os: linux-ppc64le
       #arch: ppc64le
       name: Build & Publish image on ppc64le
+      script: 
+      - docker image prune -a -f
+      - travis_wait 30 ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     - <<: *build-and-push-next
       arch: s390x
       name: Build & Publish image on s390x
