@@ -241,7 +241,7 @@ jobs:
         docker image prune -a -f
         ./build.sh  --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     - <<: *prepare-release
-      #arch: ppc64le
+      #arch: ppc64le 
       os: linux-ppc64le
       name: Prepare release and Build image on ppc64le
     - <<: *prepare-release
