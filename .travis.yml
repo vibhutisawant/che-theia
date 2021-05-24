@@ -21,6 +21,17 @@ env:
   - RECREATE_TAGS=false
   - PUSH_TO_NPMJS=true 
 
+before_script:
+  - |
+    if [[ "$TRAVIS_CPU_ARCH" == "ppc64le" ]]
+    then
+      # fix cpu count in ppc64le to avoid OOM failure
+      cat /proc/stat > /tmp/stat
+      sed -i '/^cpu[4-9]/d' /tmp/stat
+      sed -i '/^cpu[0-9][0-9]/d' /tmp/stat
+      sudo mount --bind /tmp/stat /proc/stat
+    fi
+
 jobs:
   include: 
     - stage: PR Check
