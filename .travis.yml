@@ -210,8 +210,7 @@ jobs:
         else
           echo "[INFO] No existing tags detected for $VERSION"
         fi
-    - stage: Release Che Theia on amd64
-      name: Prepare release and Build images 
+    - stage: Tag release
       if: type = api AND env(TAG) != "next"
       arch: amd64
       os: linux
@@ -224,20 +223,12 @@ jobs:
         export AKAMAI_CHE_AUTH=${AKAMAI_CHE_AUTH}
         git remote remove origin
         git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
-        ./make-release.sh  --version $TAG
-        docker image prune -a -f
-        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-        # if [[ ${PUSH_TO_NPMJS} == "true" ]]; then
-        #     printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
-        #     yarn publish:next 
-        # fi
+        ./make-release.sh  --version $TAG     
     - &prepare-release
-      stage: Release che-theia on other archs
-      name: Prepare release and Build image on arm64
+      stage: Release che-theia
+      name: Prepare release and Build image on amd64
       if: type = api AND env(TAG) != "next"
-      arch: arm64-graviton2
-      virt: vm
-      group: edge
+      arch: amd64
       script:
       - |  
         set +e
@@ -246,6 +237,16 @@ jobs:
         git checkout "${BRANCH}"
         docker image prune -a -f
         ./build.sh  --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        if [[ ${TRAVIS_CPU_ARCH} == "amd64" ]] && [[ ${PUSH_TO_NPMJS} == "true" ]]; then
+            printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
+            echo "yarn publish:next"
+            #yarn publish:next 
+        fi
+    - <<: *prepare-release
+      arch: arm64-graviton2 
+      virt: vm
+      group: edge
+      name: Prepare release and Build image on arm64-graviton2
     - <<: *prepare-release
       arch: ppc64le 
       name: Prepare release and Build image on ppc64le
