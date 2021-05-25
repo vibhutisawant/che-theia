@@ -128,31 +128,28 @@ jobs:
       env: DIST=ubi8 CHECTL_CHANNEL=stable MINIKUBE_VERSION=v1.18.1
 
 
-    - stage: Build & Publish 'next'
+    - &build-and-push-next
+      stage: Build & Publish 'next'
       name: Build & Publish image on amd64 
       if: type = push AND branch = travis
       arch: amd64
       script: 
-      - docker image prune -a -f
-      - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-      #- printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
-      #- yarn publish:next
-    - &build-and-push-next
-      stage: Build & Publish 'next' on other archs
+      - |
+        docker image prune -a -f
+        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        if [[ "TRAVIS_CPU_ARCH" = "amd64" ]] ; then 
+           echo "Publishing package to npm"
+           #printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc; 
+           #yarn publish:next
+        fi
+    - <<: *build-and-push-next
       name: Build & Publish image on arm64
-      if: type = push AND branch = travis
       arch: arm64-graviton2
       virt: vm
       group: edge
-      script: 
-      - docker image prune -a -f
-      - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     - <<: *build-and-push-next
       arch: ppc64le
       name: Build & Publish image on ppc64le
-      script: 
-      - docker image prune -a -f
-      - travis_wait 30 ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     - <<: *build-and-push-next
       arch: s390x
       name: Build & Publish image on s390x
