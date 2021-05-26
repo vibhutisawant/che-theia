@@ -198,7 +198,7 @@ jobs:
       arch: amd64
       script:
       - |  
-        set -e
+        set +e
         git remote remove origin
         git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
         VERSION=${TAG}
