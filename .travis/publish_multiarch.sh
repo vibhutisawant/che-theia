@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 REGISTRY="quay.io"
 
 PUBLISH_IMAGES_LIST=(
