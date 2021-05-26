@@ -73,7 +73,7 @@ jobs:
       install: skip
       script:
       - |
-        set +e
+        set -e
         docker image prune -a -f
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
@@ -136,7 +136,7 @@ jobs:
       arch: amd64
       script: 
       - |
-        set +e
+        set -e
         docker image prune -a -f
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
         if [[ "TRAVIS_CPU_ARCH" = "amd64" ]] ; then 
@@ -175,7 +175,7 @@ jobs:
       if: env(THEIA_GITHUB_REPO) AND env(THEIA_BRANCH)
       script:
       - |
-        set +e
+        set -e
         docker image prune -a -f
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
@@ -198,7 +198,7 @@ jobs:
       arch: amd64
       script:
       - |  
-        set +e
+        set -e
         git remote remove origin
         git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
         VERSION=${TAG}
@@ -220,7 +220,7 @@ jobs:
       os: linux
       script:
       - |  
-        set +e
+        set -e
         git config --global user.name "Mykhailo Kuznietsov"
         git config --global user.email "mkuznets@redhat.com"
         export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
@@ -262,17 +262,17 @@ jobs:
       if: type = api AND env(TAG) != "next" 
       script: 
        - | 
-         set +e
+         set -e
          .travis/publish_multiarch.sh
       after_success:
        - |
-         set +e
+         set -e
          echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":white_check_mark: Che Theia ${TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG} https://quay.io/eclipse/che-theia:${TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}\"}" > mattermost.json
          cat mattermost.json
          curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
       after_failure:
        - |
-         set +e
+         set -e
          echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
          cat mattermost.json
          curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
