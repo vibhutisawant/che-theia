@@ -73,6 +73,7 @@ jobs:
       install: skip
       script:
       - |
+        set +e
         docker image prune -a -f
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
@@ -135,6 +136,7 @@ jobs:
       arch: amd64
       script: 
       - |
+        set +e
         docker image prune -a -f
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
         if [[ "TRAVIS_CPU_ARCH" = "amd64" ]] ; then 
@@ -172,10 +174,12 @@ jobs:
       arch: amd64
       if: env(THEIA_GITHUB_REPO) AND env(THEIA_BRANCH)
       script:
-      - docker image prune -a -f
-      - docker pull quay.io/prabhav/che-theia-dev:next
-      - docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-      - ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
+      - |
+        set +e
+        docker image prune -a -f
+        docker pull quay.io/prabhav/che-theia-dev:next
+        docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
+        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     - <<: *check-a-theia-branch
       arch: arm64
       #virt: vm
@@ -257,14 +261,18 @@ jobs:
     - stage: Publish multiarch image 
       if: type = api AND env(TAG) != "next" 
       script: 
-      - .travis/publish_multiarch.sh
+       - | 
+         set +e
+         .travis/publish_multiarch.sh
       after_success:
        - |
+         set +e
          echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":white_check_mark: Che Theia ${TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG} https://quay.io/eclipse/che-theia:${TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}\"}" > mattermost.json
          cat mattermost.json
          curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
       after_failure:
        - |
+         set +e
          echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
          cat mattermost.json
          curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
