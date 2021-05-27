@@ -235,7 +235,7 @@ jobs:
       arch: amd64
       script:
       - |  
-        set +e
+        set -e
         date
         VERSION=${TAG}
         BRANCH=${VERSION%.*}.x
