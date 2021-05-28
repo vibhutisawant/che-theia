@@ -94,6 +94,11 @@ export class CheServerDevfileServiceImpl implements DevfileService {
         }
         if (endpointV1.attributes) {
           endpoint.attributes = endpointV1.attributes;
+
+          if (endpoint.attributes['type'] === 'ide') {
+            endpoint.attributes['type'] = 'main';
+          }
+
           if (endpointV1.attributes['public'] !== undefined && endpointV1.attributes['public'] === 'false') {
             endpoint.exposure = 'internal';
           }
@@ -316,6 +321,10 @@ export class CheServerDevfileServiceImpl implements DevfileService {
       if (componentV1.reference) {
         devfileV2Component.plugin.url = componentV1.reference;
       }
+      if (componentV1.registryUrl) {
+        devfileV2Component.plugin.registryUrl = componentV1.registryUrl;
+      }
+
       if (componentV1.cpuLimit) {
         devfileV2Component.plugin.cpuLimit = componentV1.cpuLimit;
       }
