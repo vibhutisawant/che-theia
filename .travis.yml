@@ -102,23 +102,24 @@ jobs:
       name: Docker build (ubi8) on s390x
       arch: s390x
       env: DIST=ubi8
+
     #happy-path
     - &happy-path
       name: happy-path (alpine, next)
       if: type = pull_request 
       install: skip
-      env: DIST=alpine CHECTL_CHANNEL=next MINIKUBE_VERSION=v1.18.1
+      env: DIST=alpine CHECTL_CHANNEL=next MINIKUBE_VERSION=v1.20.0
       arch: amd64
       script: ./.travis/happy-path.sh
     - <<: *happy-path
       name: happy-path (alpine, stable)
-      env: DIST=alpine CHECTL_CHANNEL=stable MINIKUBE_VERSION=v1.18.1
+      env: DIST=alpine CHECTL_CHANNEL=stable MINIKUBE_VERSION=v1.20.0
     - <<: *happy-path
       name: happy-path (ubi8, next)
-      env: DIST=ubi8 CHECTL_CHANNEL=next MINIKUBE_VERSION=v1.18.1
+      env: DIST=ubi8 CHECTL_CHANNEL=next MINIKUBE_VERSION=v1.20.0
     - <<: *happy-path
       name: happy-path (ubi8, stable)
-      env: DIST=ubi8 CHECTL_CHANNEL=stable MINIKUBE_VERSION=v1.18.1
+      env: DIST=ubi8 CHECTL_CHANNEL=stable MINIKUBE_VERSION=v1.20.0
 
     - &build-and-push-next
       stage: Build & Publish 'next'
@@ -131,8 +132,9 @@ jobs:
         docker image prune -a -f
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
         if [[ "TRAVIS_CPU_ARCH" = "amd64" ]] ; then 
-           echo "Publishing package to npm"
-           #printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc; 
+           #Set-up npmjs auth token
+           printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc; 
+           #Publish packages to npmjs
            #yarn publish:next
         fi
     - <<: *build-and-push-next
@@ -149,6 +151,7 @@ jobs:
       if: type = push AND branch = travis
       name: Publish multiarch image with next tag
       script: .travis/publish_multiarch.sh
+
     # publish-built-in-extension-report
     - name: Publish Built In Extension Report
       if: (type = push AND branch=travis) OR (type = cron AND branch=travis)
@@ -207,43 +210,39 @@ jobs:
       os: linux
       script:
       - |  
-        set -e
         git config --global user.name "Mykhailo Kuznietsov"
         git config --global user.email "mkuznets@redhat.com"
         export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
         export AKAMAI_CHE_AUTH=${AKAMAI_CHE_AUTH}
         git remote remove origin
         git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
-        ./make-release.sh  --version $TAG     
+        ./make-release.sh --version $TAG     
     - &prepare-release
       stage: Release che-theia
-      name: Prepare release and Build image on amd64
+      name: Build and publish image on amd64
       if: type = api AND env(TAG) != "next"
       arch: amd64
       script:
       - |  
-        set -e
-        date
-        VERSION=${TAG}
-        BRANCH=${VERSION%.*}.x
+        BRANCH=${TAG%.*}.x
         git checkout "${BRANCH}"
         docker image prune -a -f
-        ./build.sh  --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
         if [[ ${TRAVIS_CPU_ARCH} == "amd64" ]] && [[ ${PUSH_TO_NPMJS} == "true" ]]; then
+            #Set-up npmjs auth token
             printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
-            echo "yarn publish:next"
-            #yarn publish:next 
+            #Publish packages to npmjs
+            yarn publish:next 
         fi
-        date
     - <<: *prepare-release
       arch: arm64
-      name: Prepare release and Build image on arm64
+      name: Build and publish image on arm64
     - <<: *prepare-release
       arch: ppc64le 
-      name: Prepare release and Build image on ppc64le
+      name: Build and publish image on ppc64le
     - <<: *prepare-release
       arch: s390x
-      name: Prepare release and Build image on s390x
+      name: Build and publish image on s390x
 
     - stage: Publish multiarch image 
       if: type = api AND env(TAG) != "next" 
@@ -254,12 +253,12 @@ jobs:
       after_success:
        - |
          set -e
-         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":white_check_mark: Che Theia ${TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG} https://quay.io/eclipse/che-theia:${TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}\"}" > mattermost.json
+         echo "{\"text\":\":white_check_mark: Che Theia ${TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG} https://quay.io/eclipse/che-theia:${TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}\"}" > mattermost.json
          cat mattermost.json
          curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
       after_failure:
        - |
          set -e
-         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
+         echo "{\"text\":\":no_entry_sign: Che Theia ${TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
          cat mattermost.json
          curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
