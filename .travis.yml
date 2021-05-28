@@ -205,7 +205,7 @@ jobs:
           printf "[INFO] No existing tags detected for $VERSION"
         fi
     - stage: Tag release
-      if: type = api AND env(TAG) != "next"
+      if: type = api AND env(TAG) IS present AND env(TAG) != "next"
       arch: amd64
       os: linux
       script:
@@ -220,7 +220,7 @@ jobs:
     - &prepare-release
       stage: Release che-theia
       name: Build and publish image on amd64
-      if: type = api AND env(TAG) != "next"
+      if: type = api AND env(TAG) IS present AND env(TAG) != "next"
       arch: amd64
       script:
       - |  
@@ -245,7 +245,7 @@ jobs:
       name: Build and publish image on s390x
 
     - stage: Publish multiarch image 
-      if: type = api AND env(TAG) != "next" 
+      if: type = api AND env(TAG) IS present AND env(TAG) != "next" 
       script: 
        - | 
          set -e
