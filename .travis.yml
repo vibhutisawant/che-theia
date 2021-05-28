@@ -222,7 +222,8 @@ jobs:
       arch: amd64
       script:
       - |  
-        set +e
+        set -e
+        date
         VERSION=${TAG}
         BRANCH=${VERSION%.*}.x
         git checkout "${BRANCH}"
@@ -233,6 +234,7 @@ jobs:
             echo "yarn publish:next"
             #yarn publish:next 
         fi
+        date
     - <<: *prepare-release
       arch: arm64
       name: Prepare release and Build image on arm64
