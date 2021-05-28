@@ -198,7 +198,7 @@ jobs:
             printf "[INFO] Removing tag for ${VERSION} version. New tag will be recreated during release."
             git push origin :$VERSION
           else
-            printf "[ERROR] Cannot proceed with release - tag ${EXISTING_TAG} already exists."
+            printf "[ERROR] Cannot proceed with release - tag %s already exists." "${EXISTING_TAG}"
             exit 1
           fi
         else
