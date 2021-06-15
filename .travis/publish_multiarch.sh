@@ -15,10 +15,10 @@ SHORT_SHA=$(git rev-parse --short HEAD)
 for image in "${PUBLISH_IMAGES_LIST[@]}"
   do
     AMEND=""
-    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-amd64";
-    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-arm64";
-    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-ppc64le";
-    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-s390x";
+    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-travis-amd64";
+    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-travis-arm64";
+    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-travis-ppc64le";
+    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-travis-s390x";
 
     docker manifest create ${REGISTRY}/${image}:"${TAG}" $AMEND
     docker manifest push ${REGISTRY}/${image}:"${TAG}"
