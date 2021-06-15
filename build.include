@@ -43,7 +43,7 @@ parse() {
         shift ;;
       --arch:*)
         ARCH="${1#*:}"
-        IMAGE_TAG=$IMAGE_TAG-$ARCH
+        IMAGE_TAG=$IMAGE_TAG-travis-$ARCH
         shift ;;
       *)
         FILTERED_ARGS="${FILTERED_ARGS} $1"
@@ -109,9 +109,9 @@ publishImages() {
     echo y | docker push "${REGISTRY}/${image}:${IMAGE_TAG}"
     if [[ -n "${THEIA_DOCKER_IMAGE_VERSION}" ]]; then
       if [[ -n $ARCH ]]; then
-         echo "Publishing ${image}:${THEIA_DOCKER_IMAGE_VERSION}-$ARCH..."
-         docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}-$ARCH"
-         echo y | docker push "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}-$ARCH"
+         echo "Publishing ${image}:${THEIA_DOCKER_IMAGE_VERSION}-travis-$ARCH..."
+         docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}-travis-$ARCH"
+         echo y | docker push "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}-travis-$ARCH"
       else
          echo "Publishing ${image}:${THEIA_DOCKER_IMAGE_VERSION}..."
          docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}"
@@ -120,7 +120,7 @@ publishImages() {
     else
       SHORT_SHA=$(git rev-parse --short HEAD)
       if [[ -n $ARCH ]]; then
-         SHORT_SHA=$SHORT_SHA-$ARCH
+         SHORT_SHA=$SHORT_SHA-travis-$ARCH
       fi
       echo "Publishing ${image}:${SHORT_SHA}..."
       docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${SHORT_SHA}"
