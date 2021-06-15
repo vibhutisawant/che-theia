@@ -20,12 +20,12 @@ for image in "${PUBLISH_IMAGES_LIST[@]}"
     AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-travis-ppc64le";
     AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-travis-s390x";
 
-    docker manifest create ${REGISTRY}/${image}:"${TAG}" $AMEND
-    docker manifest push ${REGISTRY}/${image}:"${TAG}"
+    docker manifest create ${REGISTRY}/${image}:"${TAG}-travis" $AMEND
+    docker manifest push ${REGISTRY}/${image}:"${TAG}-travis"
 
     if [[ "${TAG}" == "next" ]]; then
-    docker manifest create ${REGISTRY}/${image}:"${SHORT_SHA}" $AMEND
-    docker manifest push ${REGISTRY}/${image}:"${SHORT_SHA}"
+    docker manifest create ${REGISTRY}/${image}:"${SHORT_SHA}-travis" $AMEND
+    docker manifest push ${REGISTRY}/${image}:"${SHORT_SHA}-travis"
     fi
 
   done
