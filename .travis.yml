@@ -200,16 +200,4 @@ jobs:
        - | 
          set -e
          .travis/publish_multiarch.sh
-      
-after_success:
- - |
-   set -e
-   echo "{\"text\":\":white_check_mark: Che Theia ${TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG} https://quay.io/eclipse/che-theia:${TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}\"}" > mattermost.json
-   cat mattermost.json
-   curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
-after_failure:
- - |
-   set -e
-   echo "{\"text\":\":no_entry_sign: Che Theia ${TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
-   cat mattermost.json
-   curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
+
