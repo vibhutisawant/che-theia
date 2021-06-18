@@ -154,6 +154,12 @@ jobs:
         else
           printf "[INFO] No existing tags detected for $VERSION"
         fi
+      after_failure:
+       - |
+         set -e
+         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG}-${TRAVIS_TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
+         curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
+
     - stage: Tag release
       if: type = api AND env(TAG) IS present AND env(TAG) != "next"
       arch: amd64
@@ -167,6 +173,12 @@ jobs:
         git remote remove origin
         git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
         ./make-release.sh --version $TAG     
+      after_failure:
+       - |
+         set -e
+         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG}-${TRAVIS_TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
+         curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
+         
     - &prepare-release
       stage: Release che-theia
       name: Build and publish image on amd64
@@ -200,4 +212,14 @@ jobs:
        - | 
          set -e
          .travis/publish_multiarch.sh
+      after_success:
+       - |
+         set -e
+         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":white_check_mark: Che Theia ${TAG}-${TRAVIS_TAG} has been released: https://quay.io/eclipse/che-theia-dev:${TAG}-${TRAVIS_TAG} https://quay.io/eclipse/che-theia:${TAG}-${TRAVIS_TAG} https://quay.io/eclipse/che-theia-endpoint-runtime-binary:${TAG}-${TRAVIS_TAG} https://quay.io/eclipse/che-theia-vsix-installer:${TAG}-${TRAVIS_TAG}\"}" > mattermost.json
+         curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
+      after_failure:
+       - |
+         set -e
+         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG}-${TRAVIS_TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
+         curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
 
