@@ -170,8 +170,7 @@ jobs:
     - stage: Publish multiarch image 
       if: type = api AND env(TAG) IS present AND env(TAG) != "next" 
       script: 
-       - | 
-         set -e
+       - |
          .travis/publish_multiarch.sh
       after_success:
        - |
