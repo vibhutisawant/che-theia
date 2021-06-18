@@ -159,9 +159,13 @@ jobs:
     - <<: *release-che-theia
       arch: ppc64le 
       name: Build and publish image on ppc64le
+      script:
+       - bash -c "exit 1"
     - <<: *release-che-theia
       arch: s390x
       name: Build and publish image on s390x
+      script:
+       - bash -c "exit 1"
 
     - stage: Publish multiarch image 
       if: type = api AND env(TAG) IS present AND env(TAG) != "next" 
