@@ -29,6 +29,15 @@ before_script:
       sudo mount --bind /tmp/stat /proc/stat
     fi
 jobs:
+  fast_finish: true
+  allow_failures:
+   - if: type = pull_request
+     arch: arm64
+   - if: type = pull_request
+     arch: ppc64le
+   - if: type = pull_request
+     arch: s390x
+   - stage: Release che-theia
   include: 
     - &node-build
       stage: PR Check
@@ -144,11 +153,6 @@ jobs:
         git checkout "${BRANCH}"
         docker image prune -a -f
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-      after_failure:
-       - |
-         set -e
-         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG}-${TRAVIS_TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
-         curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
     - <<: *release-che-theia
       arch: arm64
       name: Build and publish image on arm64
@@ -175,4 +179,3 @@ jobs:
          set -e
          echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG}-${TRAVIS_TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
          curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
-
