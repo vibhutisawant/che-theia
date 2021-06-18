@@ -133,53 +133,7 @@ jobs:
       name: Build an image against Theia branch on s390x
     
     #Release Workflow
-    - stage: Check existing tags
-      if: type = api AND env(TAG) IS present AND env(TAG) != "next"
-      arch: amd64
-      script:
-      - |  
-        set +e
-        git remote remove origin
-        git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
-        VERSION=${TAG}
-        EXISTING_TAG=$(git ls-remote --exit-code origin refs/tags/${VERSION})
-        if [[ -n ${EXISTING_TAG} ]]; then
-          if [[ ${RECREATE_TAGS} == "true" ]]; then
-            printf "[INFO] Removing tag for ${VERSION} version. New tag will be recreated during release."
-            git push origin :$VERSION
-          else
-            printf "[ERROR] Cannot proceed with release - tag ${EXISTING_TAG} already exists."
-            exit 1
-          fi
-        else
-          printf "[INFO] No existing tags detected for $VERSION"
-        fi
-      after_failure:
-       - |
-         set -e
-         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG}-${TRAVIS_TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
-         curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
-
-    - stage: Tag release
-      if: type = api AND env(TAG) IS present AND env(TAG) != "next"
-      arch: amd64
-      os: linux
-      script:
-      - |  
-        git config --global user.name "Mykhailo Kuznietsov"
-        git config --global user.email "mkuznets@redhat.com"
-        export GITHUB_TOKEN=${CHE_BOT_GITHUB_TOKEN}
-        export AKAMAI_CHE_AUTH=${AKAMAI_CHE_AUTH}
-        git remote remove origin
-        git remote add origin https://${CHE_BOT_GITHUB_TOKEN}@github.com/vibhutisawant/che-theia.git
-        ./make-release.sh --version $TAG     
-      after_failure:
-       - |
-         set -e
-         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG}-${TRAVIS_TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
-         curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
-         
-    - &prepare-release
+    - &release-che-theia
       stage: Release che-theia
       name: Build and publish image on amd64
       if: type = api AND env(TAG) IS present AND env(TAG) != "next"
@@ -190,19 +144,18 @@ jobs:
         git checkout "${BRANCH}"
         docker image prune -a -f
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-        if [[ ${TRAVIS_CPU_ARCH} == "amd64" ]] && [[ ${PUSH_TO_NPMJS} == "true" ]]; then
-            #Set-up npmjs auth token
-            printf "//registry.npmjs.org/:_authToken=${CHE_NPM_AUTH_TOKEN}\n" >> ~/.npmrc
-            #Publish packages to npmjs
-            #yarn publish:next 
-        fi
-    - <<: *prepare-release
+      after_failure:
+       - |
+         set -e
+         echo "{\"username\":\"che-bot\",\"channel\":\"eclipse-che-releases\",\"text\":\":no_entry_sign: Che Theia ${TAG}-${TRAVIS_TAG} release has failed: https://github.com/eclipse-che/che-theia/actions/workflows/release.yml\"}" > mattermost.json
+         curl -i -X POST -H 'Content-Type: application/json' -d @mattermost.json $MATTERMOST_WEBHOOK_URL
+    - <<: *release-che-theia
       arch: arm64
       name: Build and publish image on arm64
-    - <<: *prepare-release
+    - <<: *release-che-theia
       arch: ppc64le 
       name: Build and publish image on ppc64le
-    - <<: *prepare-release
+    - <<: *release-che-theia
       arch: s390x
       name: Build and publish image on s390x
 
