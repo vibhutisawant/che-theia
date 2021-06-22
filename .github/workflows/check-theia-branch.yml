@@ -49,12 +49,12 @@ jobs:
         \"request\":{
         \"branch\":\"test-release\"
         \"config\": {
-          \"env\": {
-            \"global\": [
-              \"THEIA_GITHUB_REPO=${{ github.event.inputs.theia_github_repo }}\"
-              \"THEIA_BRANCH=${{ github.event.inputs.theia_branch }}\"
-             ]
-           }
+         \"env\": {
+          \"global\": [
+           \"THEIA_GITHUB_REPO=${{ github.event.inputs.theia_github_repo }}\"
+           \"THEIA_BRANCH=${{ github.event.inputs.theia_branch }}\"
+         ]
+        }}
         }}"
         echo $body
         curl -s -X POST \
