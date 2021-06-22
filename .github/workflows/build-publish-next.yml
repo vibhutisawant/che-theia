@@ -52,8 +52,6 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-    - name: Checkout che-theia source code
-      uses: actions/checkout@v2
     - name: Trigger build on Travis CI
       run: |
         body="{
