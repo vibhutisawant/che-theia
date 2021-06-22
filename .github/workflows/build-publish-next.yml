@@ -47,3 +47,24 @@ jobs:
       run: printf "//registry.npmjs.org/:_authToken=${{ secrets.CHE_NPM_AUTH_TOKEN }}\n" >> ~/.npmrc
     - name: Publish packages to npmjs
       run: yarn publish:next
+
+  travis-build:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+    - name: Checkout che-theia source code
+      uses: actions/checkout@v2
+    - name: Trigger build on Travis CI
+      run: |
+        body="{
+        \"request\":{
+        \"branch\":\"test-release\"
+        }}"
+        echo $body
+        curl -s -X POST \
+        -H "Content-Type: application/json" \
+        -H "Accept: application/json" \
+        -H "Travis-API-Version: 3" \
+        -H "Authorization: token ${{ secrets.TRAVIS_TOKEN }}" \
+        -d "$body" \
+        https://api.travis-ci.com/repo/vibhutisawant%2Fche-theia/requests
