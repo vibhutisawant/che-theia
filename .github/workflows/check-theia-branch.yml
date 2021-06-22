@@ -47,15 +47,15 @@ jobs:
       run: |
         body="{
         \"request\":{
-        \"branch\":\"test-release\"
+        \"branch\":\"test-release\",
         \"config\": {
           \"env\": {
             \"global\": [
-              \"THEIA_GITHUB_REPO=${{ github.event.inputs.theia_github_repo }}\"
-              \"THEIA_BRANCH=${{ github.event.inputs.theia_branch }}\"
+              \"THEIA_GITHUB_REPO=${{ github.event.inputs.theia_github_repo }}\",
+               \"THEIA_BRANCH=${{ github.event.inputs.theia_branch }}\"
              ]
            }
-        }
+        } 
         }}"
         echo $body
         curl -s -X POST \
@@ -65,4 +65,3 @@ jobs:
         -H "Authorization: token ${{ secrets.TRAVIS_TOKEN }}" \
         -d "$body" \
         https://api.travis-ci.com/repo/vibhutisawant%2Fche-theia/requests
-
