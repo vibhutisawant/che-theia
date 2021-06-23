@@ -17,6 +17,7 @@ env:
   global:
   - TAG=next
   - TRAVIS_TAG=travis
+  - PR_NUMBER=
 
 before_script:
   - |
@@ -31,19 +32,21 @@ before_script:
 jobs:
   fast_finish: true
   allow_failures:
-   - if: type = pull_request
+   - if: env(PR_NUMBER) IS present
      arch: arm64
-   - if: type = pull_request
+   - if: env(PR_NUMBER) IS present
      arch: ppc64le
-   - if: type = pull_request
+   - if: env(PR_NUMBER) IS present
      arch: s390x
   include: 
     - &node-build
       stage: PR Check
       name: Node Build on amd64
-      if: type = pull_request 
+      if: env(PR_NUMBER) IS present
       arch: amd64
-      install: skip
+      install:
+        - git fetch origin +refs/pull/${PR_NUMBER}/merge
+        - git checkout -qf FETCH_HEAD
       script: yarn
     - <<: *node-build
       name: Node Build on arm64
@@ -55,11 +58,13 @@ jobs:
       name: Node Build on s390x
       arch: s390x
     - &docker-build
-      if: type = pull_request 
+      if: env(PR_NUMBER) IS present
       name: Docker build (Alpine) on amd64
       arch: amd64
       env: DIST=alpine
-      install: skip
+      install:
+        - git fetch origin +refs/pull/${PR_NUMBER}/merge
+        - git checkout -qf FETCH_HEAD
       script:
       - |
         set -e
