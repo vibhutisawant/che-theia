@@ -22,10 +22,15 @@ for image in "${PUBLISH_IMAGES_LIST[@]}"
 
     docker manifest create ${REGISTRY}/${image}:"${TAG}-${TRAVIS_TAG}" $AMEND
     docker manifest push ${REGISTRY}/${image}:"${TAG}-${TRAVIS_TAG}"
+    
+    if [[ "${TAG}" != "next" ]]; then
+       docker manifest create ${REGISTRY}/${image}:"latest-${TRAVIS_TAG}" $AMEND
+       docker manifest push ${REGISTRY}/${image}:"latest-${TRAVIS_TAG}"
+    fi
 
     if [[ "${TAG}" == "next" ]]; then
-    docker manifest create ${REGISTRY}/${image}:"${SHORT_SHA}-${TRAVIS_TAG}" $AMEND
-    docker manifest push ${REGISTRY}/${image}:"${SHORT_SHA}-${TRAVIS_TAG}"
+       docker manifest create ${REGISTRY}/${image}:"${SHORT_SHA}-${TRAVIS_TAG}" $AMEND
+       docker manifest push ${REGISTRY}/${image}:"${SHORT_SHA}-${TRAVIS_TAG}"
     fi
 
   done
