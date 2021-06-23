@@ -42,7 +42,7 @@ WORKDIR ${HOME}
 EXPOSE 3000 3030
 
 # Configure npm and yarn to use home folder for global dependencies
-RUN echo "Test che theia" && \
+RUN echo "Test che theia PR" && \
     npm config set prefix "${HOME}/.npm-global" && \
     echo "--global-folder \"${HOME}/.yarn-global\"" > ${HOME}/.yarnrc && \
     yarn config set network-timeout 600000 -g && \
