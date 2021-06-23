@@ -23,12 +23,13 @@ function __setError(url: string, error: any): void {
   myErrors.set(url, error);
 }
 
-function get(url: string): any {
+async function  get(url: string): Promise<any> {
   if (myErrors.has(url)) {
-    throw myErrors.get(url);
+    const storedError = myErrors.get(url);
+    throw storedError;
   }
 
-  return Promise.resolve({ data: myContent.get(url) });
+  return { data: myContent.get(url) };
 }
 function __clearMock(): void {
   myContent.clear();
@@ -40,3 +41,7 @@ axios.__setContent = __setContent;
 axios.__setError = __setError;
 axios.__clearMock = __clearMock;
 module.exports = axios;
+
+
+axios.create = jest.fn();
+axios.create.mockResolvedValue(axios);
