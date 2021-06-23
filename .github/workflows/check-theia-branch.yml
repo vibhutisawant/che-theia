@@ -51,7 +51,7 @@ jobs:
           \"env\": {
             \"global\": [
               \"THEIA_GITHUB_REPO=${{ github.event.inputs.theia_github_repo }}\",
-               \"THEIA_BRANCH=${{ github.event.inputs.theia_branch }}\"
+              \"THEIA_BRANCH=${{ github.event.inputs.theia_branch }}\"
              ]
            }
         } 
