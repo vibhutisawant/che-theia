@@ -109,7 +109,7 @@ publishImages() {
     docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${IMAGE_TAG}"
     echo y | docker push "${REGISTRY}/${image}:${IMAGE_TAG}"
     if [[ -n "${THEIA_DOCKER_IMAGE_VERSION}" ]]; then
-      if [[ -n $ARCH ]]; then
+      if [[ -n  "${ARCH}" ]]; then
          echo "Publishing ${image}:${THEIA_DOCKER_IMAGE_VERSION}-travis-$ARCH..."
          docker tag "${image}:${IMAGE_TAG}" "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}-travis-$ARCH"
          echo y | docker push "${REGISTRY}/${image}:${THEIA_DOCKER_IMAGE_VERSION}-travis-$ARCH"
@@ -120,7 +120,7 @@ publishImages() {
       fi
     else
       SHORT_SHA=$(git rev-parse --short HEAD)
-      if [[ -n $ARCH ]]; then
+      if [[ -n "${ARCH}" ]]; then
          SHORT_SHA=$SHORT_SHA-travis-$ARCH
       fi
       echo "Publishing ${image}:${SHORT_SHA}..."
