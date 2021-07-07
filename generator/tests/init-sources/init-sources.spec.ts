@@ -76,6 +76,7 @@ describe('Test Extensions', () => {
 
     function initGit(cwd: string) {
         cp.execSync('git init', { cwd });
+        cp.execSync('git checkout -b main', { cwd });
         cp.execSync('git config --local user.name "test user"', { cwd });
         cp.execSync('git config --local user.email user@example.com', { cwd });
         cp.execSync(`git add ${cwd}`, { cwd });
@@ -105,7 +106,7 @@ describe('Test Extensions', () => {
                 },
                 {
                     source: 'file://' + sourceExtension2Tmp,
-                    checkoutTo: 'master',
+                    checkoutTo: 'main',
                 },
             ],
         };
@@ -234,7 +235,7 @@ describe('Test Extensions', () => {
                 },
                 {
                     source: 'file://' + sourceExtension2Tmp,
-                    checkoutTo: 'master',
+                    checkoutTo: 'main',
                 },
             ],
         };
@@ -289,7 +290,7 @@ describe('Test Extensions', () => {
                 },
                 {
                     source: 'file://' + sourceExtension2Tmp,
-                    checkoutTo: 'master',
+                    checkoutTo: 'main',
                 },
             ],
         };
@@ -383,7 +384,7 @@ describe('Test Extensions', () => {
 
         expect(yargsMockup.options['dev']).toEqual({
             description:
-                'Initialize current Theia with Che/Theia extensions from "master" branch instead of provided branches',
+                'Initialize current Theia with Che/Theia extensions from "main" branch instead of provided branches',
             alias: 'd',
             type: 'boolean',
             default: false,
@@ -409,7 +410,7 @@ describe('Test Extensions', () => {
                 },
                 {
                     source: 'file://' + sourceExtension2Tmp,
-                    checkoutTo: 'master',
+                    checkoutTo: 'main',
                 },
             ],
         };

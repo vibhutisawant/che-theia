@@ -8,10 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  ***********************************************************************/
 
-import * as https from 'https';
-import * as tunnel from 'tunnel';
-import * as url from 'url';
-
 import {
   ChePluginMetadata,
   ChePluginRegistries,
@@ -21,10 +17,9 @@ import {
 } from '../common/che-plugin-protocol';
 import { DevfileComponent, DevfileService } from '@eclipse-che/theia-remote-api/lib/common/devfile-service';
 import { WorkspaceService, WorkspaceSettings } from '@eclipse-che/theia-remote-api/lib/common/workspace-service';
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { injectable, interfaces } from 'inversify';
 
-import { CertificateService } from '@eclipse-che/theia-remote-api/lib/common/certificate-service';
+import { HttpService } from '@eclipse-che/theia-remote-api/lib/common/http-service';
 import { PluginFilter } from '../common/plugin/plugin-filter';
 import URI from '@theia/core/lib/common/uri';
 
@@ -64,7 +59,7 @@ const PLUGIN_REGISTRY_INTERNAL_URL = 'cheWorkspacePluginRegistryInternalUrl';
 export class ChePluginServiceImpl implements ChePluginService {
   private workspaceService: WorkspaceService;
   private devfileService: DevfileService;
-  private certificateService: CertificateService;
+  private httpService: HttpService;
 
   private defaultRegistry: ChePluginRegistry;
 
@@ -75,7 +70,7 @@ export class ChePluginServiceImpl implements ChePluginService {
   constructor(container: interfaces.Container) {
     this.workspaceService = container.get(WorkspaceService);
     this.devfileService = container.get(DevfileService);
-    this.certificateService = container.get(CertificateService);
+    this.httpService = container.get(HttpService);
   }
 
   setClient(client: ChePluginServiceClient): void {
@@ -88,15 +83,9 @@ export class ChePluginServiceImpl implements ChePluginService {
 
   dispose(): void {}
 
-  ensurePluginsURI(uri: string): string {
-    if (!uri.endsWith('/plugins/')) {
-      if (uri.endsWith('/')) {
-        uri = uri.substring(0, uri.length - 1);
-      }
-
-      if (!uri.endsWith('/plugins')) {
-        uri += '/plugins/';
-      }
+  normalizeEnding(uri: string): string {
+    if (uri.endsWith('/')) {
+      return uri.substring(0, uri.length - 1);
     }
 
     return uri;
@@ -111,16 +100,12 @@ export class ChePluginServiceImpl implements ChePluginService {
       const workspaceSettings: WorkspaceSettings = await this.workspaceService.getWorkspaceSettings();
       if (workspaceSettings && workspaceSettings[PLUGIN_REGISTRY_INTERNAL_URL]) {
         const uri = workspaceSettings[PLUGIN_REGISTRY_INTERNAL_URL];
-
-        let publicUri: string | undefined;
-        if (workspaceSettings[PLUGIN_REGISTRY_URL]) {
-          publicUri = workspaceSettings[PLUGIN_REGISTRY_URL];
-        }
+        const publicUri = workspaceSettings[PLUGIN_REGISTRY_URL] || uri;
 
         this.defaultRegistry = {
           name: 'Eclipse Che plugins',
-          uri: this.ensurePluginsURI(uri),
-          publicUri: publicUri ? this.ensurePluginsURI(publicUri) : undefined,
+          uri: this.normalizeEnding(uri),
+          publicUri: this.normalizeEnding(publicUri),
         };
 
         return this.defaultRegistry;
@@ -131,99 +116,6 @@ export class ChePluginServiceImpl implements ChePluginService {
       console.error(error);
       return Promise.reject(`Unable to get default plugin registry URI. ${error.message}`);
     }
-  }
-
-  /**
-   * If the URI points to default plugin registry, axios will use local authority certificates.
-   */
-  private async getAxiosInstance(uri: string): Promise<AxiosInstance> {
-    const certificateAuthority = await this.certificateService.getCertificateAuthority();
-
-    const proxyUrl = process.env.http_proxy;
-    const baseUrl = process.env.CHE_API;
-    if (proxyUrl && proxyUrl !== '' && baseUrl) {
-      const parsedBaseUrl = url.parse(baseUrl);
-      if (parsedBaseUrl.hostname && this.shouldProxy(parsedBaseUrl.hostname)) {
-        const axiosRequestConfig: AxiosRequestConfig | undefined = {
-          proxy: false,
-        };
-        const parsedProxyUrl = url.parse(proxyUrl);
-        const mainProxyOptions = this.getMainProxyOptions(parsedProxyUrl);
-        const httpsProxyOptions = this.getHttpsProxyOptions(
-          mainProxyOptions,
-          parsedBaseUrl.hostname,
-          certificateAuthority
-        );
-        const httpOverHttpAgent = tunnel.httpOverHttp({ proxy: mainProxyOptions });
-        const httpOverHttpsAgent = tunnel.httpOverHttps({ proxy: httpsProxyOptions });
-        const httpsOverHttpAgent = tunnel.httpsOverHttp({
-          proxy: mainProxyOptions,
-          ca: certificateAuthority ? certificateAuthority : undefined,
-        });
-        const httpsOverHttpsAgent = tunnel.httpsOverHttps({
-          proxy: httpsProxyOptions,
-          ca: certificateAuthority ? certificateAuthority : undefined,
-        });
-        const urlIsHttps = (parsedBaseUrl.protocol || 'http:').startsWith('https:');
-        const proxyIsHttps = (parsedProxyUrl.protocol || 'http:').startsWith('https:');
-        if (urlIsHttps) {
-          axiosRequestConfig.httpsAgent = proxyIsHttps ? httpsOverHttpsAgent : httpsOverHttpAgent;
-        } else {
-          axiosRequestConfig.httpAgent = proxyIsHttps ? httpOverHttpsAgent : httpOverHttpAgent;
-        }
-        return axios.create(axiosRequestConfig);
-      }
-    }
-
-    if (uri.startsWith(this.defaultRegistry.uri) && certificateAuthority) {
-      return axios.create({
-        httpsAgent: new https.Agent({
-          ca: certificateAuthority,
-        }),
-      });
-    }
-
-    return axios;
-  }
-
-  private getHttpsProxyOptions(
-    mainProxyOptions: tunnel.ProxyOptions,
-    servername: string | undefined,
-    certificateAuthority: Buffer[] | undefined
-  ): tunnel.HttpsProxyOptions {
-    return {
-      host: mainProxyOptions.host,
-      port: mainProxyOptions.port,
-      proxyAuth: mainProxyOptions.proxyAuth,
-      servername,
-      ca: certificateAuthority ? certificateAuthority : undefined,
-    };
-  }
-
-  private getMainProxyOptions(parsedProxyUrl: url.UrlWithStringQuery): tunnel.ProxyOptions {
-    const port = Number(parsedProxyUrl.port);
-    return {
-      host: parsedProxyUrl.hostname!,
-      port: parsedProxyUrl.port !== '' && !isNaN(port) ? port : 3128,
-      proxyAuth: parsedProxyUrl.auth && parsedProxyUrl.auth !== '' ? parsedProxyUrl.auth : undefined,
-    };
-  }
-
-  private shouldProxy(hostname: string): boolean {
-    const noProxyEnv = process.env.no_proxy || process.env.NO_PROXY;
-    const noProxy: string[] = noProxyEnv ? noProxyEnv.split(',').map(s => s.trim()) : [];
-    return !noProxy.some(rule => {
-      if (!rule) {
-        return false;
-      }
-      if (rule === '*') {
-        return true;
-      }
-      if (rule[0] === '.' && hostname.substr(hostname.length - rule.length) === rule) {
-        return true;
-      }
-      return hostname === rule;
-    });
   }
 
   /**
@@ -287,14 +179,10 @@ export class ChePluginServiceImpl implements ChePluginService {
 
         for (let pIndex = 0; pIndex < registryPlugins.length; pIndex++) {
           const metadataInternal: ChePluginMetadataInternal = registryPlugins[pIndex];
-          const pluginYamlURI = this.getPluginYampURI(registry, metadataInternal);
+          const pluginYamlURI = this.getPluginYamlURI(registry, metadataInternal);
 
           try {
-            const pluginMetadata = await this.loadPluginMetadata(
-              pluginYamlURI,
-              longKeyFormat,
-              registry.publicUri || registry.uri
-            );
+            const pluginMetadata = await this.loadPluginMetadata(pluginYamlURI, longKeyFormat, registry.publicUri);
             this.cachedPlugins.push(pluginMetadata);
             await this.client.notifyPluginCached(this.cachedPlugins.length);
           } catch (error) {
@@ -337,8 +225,9 @@ export class ChePluginServiceImpl implements ChePluginService {
    * @return list of available plugins
    */
   private async loadPluginList(registry: ChePluginRegistry): Promise<ChePluginMetadataInternal[]> {
-    const axiosInstance = await this.getAxiosInstance(registry.uri);
-    return (await axiosInstance.get<ChePluginMetadataInternal[]>(registry.uri)).data;
+    const registryURI = registry.uri + '/plugins/';
+    const registryContent = (await this.httpService.get(registryURI)) || '{}';
+    return JSON.parse(registryContent) as ChePluginMetadataInternal[];
   }
 
   /**
@@ -348,7 +237,7 @@ export class ChePluginServiceImpl implements ChePluginService {
    * @param plugin plugin metadata
    * @return uri to plugin yaml file
    */
-  private getPluginYampURI(registry: ChePluginRegistry, plugin: ChePluginMetadataInternal): string {
+  private getPluginYamlURI(registry: ChePluginRegistry, plugin: ChePluginMetadataInternal): string {
     if (plugin.links && plugin.links.self) {
       const self: string = plugin.links.self;
       if (self.startsWith('/')) {
@@ -359,11 +248,7 @@ export class ChePluginServiceImpl implements ChePluginService {
           // ends with `v3/plugins`, but ${plugin.links.self} starts with `/v3/plugins/${plugin.id}.
           // See https://github.com/eclipse/che-plugin-registry/blob/master/build/scripts/index.sh#L27
           // So the correct plugin url for both cases will be plugin registry url + plugin id.
-          if (registry.uri.endsWith('/')) {
-            return `${registry.uri}${plugin.id}/`;
-          } else {
-            return `${registry.uri}/${plugin.id}/`;
-          }
+          return `${registry.uri}/plugins/${plugin.id}/`;
         }
         const uri = new URI(registry.uri);
         return `${uri.scheme}://${uri.authority}${self}`;
@@ -394,9 +279,8 @@ export class ChePluginServiceImpl implements ChePluginService {
   private async loadPluginYaml(yamlURI: string): Promise<ChePluginMetadata> {
     let err;
     try {
-      const axiosInstance = await this.getAxiosInstance(yamlURI);
-      const data = (await axiosInstance.get<ChePluginMetadata[]>(yamlURI)).data;
-      return yaml.safeLoad(data);
+      const pluginYamlContent = await this.httpService.get(yamlURI);
+      return yaml.safeLoad(pluginYamlContent);
     } catch (error) {
       console.error(error);
       err = error;
@@ -407,9 +291,8 @@ export class ChePluginServiceImpl implements ChePluginService {
         yamlURI += '/';
       }
       yamlURI += 'meta.yaml';
-      const axiosInstance = await this.getAxiosInstance(yamlURI);
-      const data = (await axiosInstance.get<ChePluginMetadata[]>(yamlURI)).data;
-      return yaml.safeLoad(data);
+      const pluginYamlContent = await this.httpService.get(yamlURI);
+      return yaml.safeLoad(pluginYamlContent);
     } catch (error) {
       console.error(error);
       return Promise.reject('Unable to load plugin metadata. ' + err.message);
@@ -419,7 +302,7 @@ export class ChePluginServiceImpl implements ChePluginService {
   private async loadPluginMetadata(
     yamlURI: string,
     longKeyFormat: boolean,
-    pluginRegistryURI?: string
+    pluginRegistryURI: string
   ): Promise<ChePluginMetadata> {
     try {
       const props: ChePluginMetadata = await this.loadPluginYaml(yamlURI);
@@ -435,10 +318,13 @@ export class ChePluginServiceImpl implements ChePluginService {
         }
       }
 
-      let icon = props.icon;
-      if (pluginRegistryURI && props.icon && props.icon.startsWith('/')) {
-        const uri = new URI(pluginRegistryURI);
-        icon = `${uri.scheme}://${uri.authority}${icon}`;
+      let icon;
+      if (props.icon.startsWith('http://') || props.icon.startsWith('https://')) {
+        // icon refers on external resource
+        icon = props.icon;
+      } else {
+        // icon must be relative to plugin registry ROOT
+        icon = props.icon.startsWith('/') ? pluginRegistryURI + props.icon : pluginRegistryURI + '/' + props.icon;
       }
 
       return {
