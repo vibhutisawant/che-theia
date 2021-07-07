@@ -15,6 +15,12 @@ set -o pipefail
 parse "$@"
 yarn ${YARN_OPTS}
 
+if [[ -n "${TAG}" ]];then
+   IMAGE_TAG=$TAG
+   if [[ -n "${THEIA_DOCKER_IMAGE_VERSION}" ]]; then
+   THEIA_DOCKER_IMAGE_VERSION=$TAG
+fi
+
 buildImages
 
 if is_publish_images; then

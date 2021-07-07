@@ -15,8 +15,7 @@ install:
 
 env: 
   global:
-  - TAG=next
-  - TRAVIS_TAG=travis
+  - TAG=next-travis
   - PR_NUMBER=
 
 before_script:
@@ -99,15 +98,15 @@ jobs:
       env: DIST=ubi8
 
     - &build-and-push-next
-      stage: Build & Publish 'next'
+      stage: Build & Publish 'next-travis'
       name: Build & Publish image on amd64 
-      if: type = api AND branch = test-release1 AND env(TAG) = "next"
+      if: type = api AND branch = test-release1 AND env(TAG) = "next-travis"
       arch: amd64
       script: 
       - |
         set -e
         docker image prune -a -f
-        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     - <<: *build-and-push-next
       name: Build & Publish image on arm64
       arch: arm64
@@ -121,7 +120,7 @@ jobs:
     - stage: Publish multiarch image with 'next' tag
       if: type = api AND branch = test-release1 AND env(TAG) = "next"
       name: Publish multiarch image with next tag
-      script: .travis/publish_multiarch.sh
+      script: .ci/publish_multiarch.sh
 
     - &check-a-theia-branch
       stage: Check a Theia branch
@@ -134,7 +133,7 @@ jobs:
         docker image prune -a -f
         docker pull quay.io/prabhav/che-theia-dev:next
         docker tag quay.io/prabhav/che-theia-dev:next prabhav/che-theia-dev:next
-        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
+        TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     - <<: *check-a-theia-branch
       arch: arm64
       name: Build an image against Theia branch on arm64
@@ -155,8 +154,9 @@ jobs:
       - |  
         BRANCH=${TAG%.*}.x
         git checkout "${BRANCH}"
+        TAG=$TAG-travis
         docker image prune -a -f
-        ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     - <<: *release-che-theia
       arch: arm64
       name: Build and publish image on arm64
@@ -168,8 +168,5 @@ jobs:
       name: Build and publish image on s390x
 
     - stage: Publish multiarch image 
-      if: type = api AND env(TAG) IS present AND env(TAG) != "next" 
-      script: 
-       - |
-         .travis/publish_multiarch.sh
-
+      if: type = api AND env(TAG) IS present AND env(TAG) != "next"
+      script: .ci/publish_multiarch.sh
