@@ -16,16 +16,7 @@ git:
 language: node_js
 node_js: "12"
 
-install:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
-
-env: 
-  global:
-  - TAG=next-travis
-  - PR_NUMBER=
-
-before_script:
+before_install:
   - |
     if [[ "${TRAVIS_CPU_ARCH}" == "ppc64le" || "${TRAVIS_CPU_ARCH}" == "arm64" ]]
     then
@@ -35,6 +26,15 @@ before_script:
       sed -i '/^cpu[0-9][0-9]/d' /tmp/stat
       sudo mount --bind /tmp/stat /proc/stat
     fi
+
+install:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+
+env: 
+  global:
+  - TAG=next-travis
+  - PR_NUMBER=
 
 jobs:
   fast_finish: true
