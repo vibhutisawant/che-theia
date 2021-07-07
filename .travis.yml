@@ -126,7 +126,7 @@ jobs:
       name: Build & Publish image on s390x
 
     - stage: Publish multiarch image with 'next-travis' tag
-      if: type = api AND branch = test-release1 AND env(TAG) = "next-travis"
+      if: type = api AND branch = test-release AND env(TAG) = "next-travis"
       name: Publish multiarch image with next-travis tag
       script: .ci/travis/publish_multiarch.sh
 
