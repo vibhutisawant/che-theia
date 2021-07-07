@@ -18,6 +18,12 @@ THEIA_COMMIT_SHA="9648953cd6e8552b7e027558509ba77770bd8b6f"
 THEIA_GIT_REFS="refs\\/heads\\/master"
 THEIA_DOCKER_IMAGE_VERSION=
 
+
+if [[ "$(uname -m)" == "ppc64le" || "$(uname -m)" == "s390x" ]]; then
+  # On ppc64le and s390x, keytar install fails due to  libsecret-dev dependency for che-theia
+  sed -i 's/RUN/RUN apk add libsecret-dev \&\&/1' dockerfiles/theia/Dockerfile
+fi
+
 prepare_yarn_root_args() {
     IFS=',' read -r -a YARN_ARGS_ARRAY <<< "$@"
     for i in ${YARN_ARGS_ARRAY[@]+"${YARN_ARGS_ARRAY[@]}"}; do

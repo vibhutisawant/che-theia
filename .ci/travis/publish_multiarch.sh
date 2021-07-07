@@ -28,16 +28,16 @@ for image in "${PUBLISH_IMAGES_LIST[@]}"
     AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-ppc64le";
     AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-s390x";
 
-    docker manifest create "${REGISTRY}/${image}:${TAG}" $AMEND
+    eval docker manifest create "${REGISTRY}/${image}:${TAG}" "$AMEND"
     docker manifest push "${REGISTRY}/${image}:${TAG}"
     
     if [[ "${TAG}" != "next-travis" ]]; then
-       docker manifest create "${REGISTRY}/${image}:latest" $AMEND
+       eval docker manifest create "${REGISTRY}/${image}:latest" "$AMEND"
        docker manifest push "${REGISTRY}/${image}:latest"
     fi
 
     if [[ "${TAG}" == "next-travis" ]]; then
-       docker manifest create "${REGISTRY}/${image}:${SHORT_SHA}" $AMEND
+       eval docker manifest create "${REGISTRY}/${image}:${SHORT_SHA}" "$AMEND"
        docker manifest push "${REGISTRY}/${image}:${SHORT_SHA}"
     fi
 
