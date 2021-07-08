@@ -16,7 +16,7 @@ parse "$@"
 yarn ${YARN_OPTS}
 
 if [[ -n "${TAG}" ]]; then
-   IMAGE_TAG=$TAG
+   IMAGE_TAG=$TAG 
 fi
 
 buildImages
