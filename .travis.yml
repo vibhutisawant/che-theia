@@ -107,17 +107,20 @@ jobs:
 
     - &build-and-push-next
       stage: Build & Publish 'next-travis'
-      name: Build & Publish image on amd64 
+    #  name: Build & Publish image on amd64 
       if: type = api AND branch = test-release AND env(TAG) = "next-travis"
-      arch: amd64
+    #  arch: amd64
       script: 
       - |
         set -e
         docker image prune -a -f
         TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-    - <<: *build-and-push-next
+    #- <<: *build-and-push-next
       name: Build & Publish image on arm64
-      arch: arm64
+      #arch: arm64
+      group: edge
+      arch: arm64-graviton2
+      virt: vm
     - <<: *build-and-push-next
       arch: ppc64le
       name: Build & Publish image on ppc64le

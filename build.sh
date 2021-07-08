@@ -15,8 +15,14 @@ set -o pipefail
 parse "$@"
 yarn ${YARN_OPTS}
 
-if [[ -n "${TAG}" ]]; then
-   IMAGE_TAG=$TAG 
+#Added to handle experimental Travis tag
+if [[ -n "${TAG:-}" ]]; then
+   if [[ -z "${THEIA_DOCKER_IMAGE_VERSION}" ]]; then
+        IMAGE_TAG=$TAG
+   else
+        IMAGE_TAG=$IMAGE_TAG-travis-"$(uname -m)"
+        THEIA_DOCKER_IMAGE_VERSION=$TAG
+   fi
 fi
 
 buildImages
