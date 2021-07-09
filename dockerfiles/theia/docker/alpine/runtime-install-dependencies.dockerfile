@@ -8,4 +8,4 @@
 # Install sshpass for handling passwords for SSH keys
 # Install lsblk as Theia requires it
 # Install libsecret as Theia requires it
-RUN apk add --update --no-cache sudo git bzip2 which bash curl openssh openssh-keygen less sshpass lsblk libsecret-dev
+RUN apk add --update --no-cache sudo git bzip2 which bash curl openssh openssh-keygen less sshpass lsblk libsecret
