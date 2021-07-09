@@ -29,7 +29,7 @@ before_install:
     fi
     if [[ "${TRAVIS_CPU_ARCH}" == "s390x" ]]
     then
-      export NODE_OPTIONS=--max_old_space_size=4096
+      export NODE_OPTIONS=--max_old_space_size=8192
     fi
 
 install:
