@@ -21,7 +21,7 @@ THEIA_DOCKER_IMAGE_VERSION=
 
 if [[ "$(uname -m)" == "ppc64le" || "$(uname -m)" == "s390x" ]]; then
   # On ppc64le and s390x, keytar install fails due to  libsecret-dev dependency for che-theia
-  sed -i 's/RUN/RUN apk add libsecret-dev \&\&/1' dockerfiles/theia/Dockerfile
+  sed -i -z 's/RUN/RUN apk add libsecret-dev \&\&/1' dockerfiles/theia/Dockerfile
 fi
 
 prepare_yarn_root_args() {
