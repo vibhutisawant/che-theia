@@ -25,7 +25,7 @@ ARG THEIA_VERSION=master
 
 ARG THEIA_COMMIT_SHA=''
 
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NODE_OPTIONS="--max-old-space-size=8192  --max_old_space_size=8192"
 
 # avoid any linter/formater/unit test
 ENV SKIP_LINT=true SKIP_FORMAT=true SKIP_TEST=true
