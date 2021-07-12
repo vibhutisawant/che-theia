@@ -13,6 +13,9 @@ cache: false
 git:
   depth: false 
 
+services:
+  - docker
+
 language: node_js
 node_js: "12"
 
@@ -25,9 +28,6 @@ before_install:
       sed -i '/^cpu[0-9][0-9]/d' /tmp/stat
       sudo mount --bind /tmp/stat /proc/stat
     fi
-    # if [[ "${TRAVIS_CPU_ARCH}" == "s390x" ]]; then
-    #   export NODE_OPTIONS=--max_old_space_size=8192
-    # fi
 
 install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
