@@ -17,7 +17,6 @@ WORKDIR ${HOME}
 # Export GITHUB_TOKEN into environment variable
 ARG GITHUB_TOKEN=''
 ENV GITHUB_TOKEN=$GITHUB_TOKEN
-ENV NODE_OPTIONS=”–max_old_space_size=2048″
 
 ARG THEIA_GITHUB_REPO=eclipse-theia/theia
 
@@ -26,7 +25,7 @@ ARG THEIA_VERSION=master
 
 ARG THEIA_COMMIT_SHA=''
 
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NODE_OPTIONS="--max-old-space-size=8192"
 
 # avoid any linter/formater/unit test
 ENV SKIP_LINT=true SKIP_FORMAT=true SKIP_TEST=true
