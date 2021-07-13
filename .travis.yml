@@ -33,6 +33,7 @@ before_install:
 install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
+  - sudo free -h
 
 env: 
   global:
