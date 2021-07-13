@@ -38,6 +38,7 @@ env:
   global:
   - TAG=next-travis
   - PR_NUMBER=
+  - SKIP_FORMAT=true
 
 jobs:
   fast_finish: true
