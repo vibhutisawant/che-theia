@@ -97,22 +97,22 @@ export class Yarn {
             nodePackages.map(e => e.path).filter((value, index, array) => index === array.indexOf(value))
         );
     }
-    /**
-     * Exclude dependencies which defined on excludedPackages
-     *
-     * @protected
-     * @param {string} pkg
-     * @returns
-     * @memberof Yarn
-     */
-    protected isExcluded(pkg: string) {
-        const exist = this.excludedPackages.indexOf(pkg) !== -1;
-        if (exist) {
-            Logger.debug(` --> Excluding the dependency ${pkg}`);
-            return true;
-        }
-        return false;
-    }
+    // /**
+    //  * Exclude dependencies which defined on excludedPackages
+    //  *
+    //  * @protected
+    //  * @param {string} pkg
+    //  * @returns
+    //  * @memberof Yarn
+    //  */
+    // protected isExcluded(pkg: string) {
+    //     const exist = this.excludedPackages.indexOf(pkg) !== -1;
+    //     if (exist) {
+    //         Logger.debug(` --> Excluding the dependency ${pkg}`);
+    //         return true;
+    //     }
+    //     return false;
+    // }
     /**
      * Find from children all the direct dependencies. Also exclude some dependencies by not analyzing them.
      * Allow as well to report error in case of a forbidden dependency found
@@ -125,9 +125,9 @@ export class Yarn {
         nodeTreeDependencies: Map<string, string[]>,
         subsetDependencies: string[]
     ): void {
-        children.forEach(child => {
+        children.map(child => {
             // only loop on exist
-            if (subsetDependencies.indexOf(child) >= 0 || this.isExcluded(child)) {
+            if (subsetDependencies.indexOf(child) >= 0 ) {
                 return;
             }
             subsetDependencies.push(child);
@@ -135,7 +135,14 @@ export class Yarn {
             // loop on children in any
             let depChildren = nodeTreeDependencies.get(child);
             if (depChildren) {
-                depChildren = depChildren.filter(depChild => !this.isExcluded(depChild));
+                depChildren = depChildren.filter(depChild => {
+                    const res = this.excludedPackages.indexOf(depChild) < 0;
+                    if (!res) {
+                        Logger.debug(` --> Excluding the dependency ${depChild}`);
+                    }
+                    return res;
+                });
+                //depChildren = depChildren.filter(depChild => !this.isExcluded(depChild));
 
                 const matching: string[] = [];
                 const foundForbiddenPackage = depChildren.some(r => {

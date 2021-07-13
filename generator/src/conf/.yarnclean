@@ -28,7 +28,7 @@ dugite/git/*
 onigasm
 oniguruma
 @theia/monaco
-react
+#react
 react-dom
 font-awesome
 @theia/monaco-editor-core
