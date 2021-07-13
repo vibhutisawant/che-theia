@@ -135,6 +135,7 @@ export class Yarn {
             // loop on children in any
             let depChildren = nodeTreeDependencies.get(child);
             if (depChildren) {
+                //depChildren = depChildren.filter(depChild => !this.isExcluded(depChild));
                 depChildren = depChildren.filter(depChild => {
                     const res = this.excludedPackages.indexOf(depChild) < 0;
                     if (!res) {
@@ -142,8 +143,6 @@ export class Yarn {
                     }
                     return res;
                 });
-                //depChildren = depChildren.filter(depChild => !this.isExcluded(depChild));
-
                 const matching: string[] = [];
                 const foundForbiddenPackage = depChildren.some(r => {
                     const res = this.forbiddenPackages.indexOf(r) >= 0;
