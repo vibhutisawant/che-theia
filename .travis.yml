@@ -7,6 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 # Che-Theia workflow
+
 dist: focal
 os: linux
 cache: false
@@ -122,8 +123,7 @@ jobs:
       name: Build & Publish image on arm64
       #arch: arm64
       group: edge
-      arch: arm64-graviton2
-      virt: vm
+      arch: arm64
     - <<: *build-and-push-next
       arch: ppc64le
       name: Build & Publish image on ppc64le
