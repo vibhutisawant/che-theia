@@ -122,7 +122,6 @@ jobs:
     #- <<: *build-and-push-next
       name: Build & Publish image on arm64
       #arch: arm64
-      group: edge
       arch: arm64
     - <<: *build-and-push-next
       arch: ppc64le
