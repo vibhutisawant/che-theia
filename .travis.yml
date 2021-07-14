@@ -22,7 +22,7 @@ node_js: "12"
 
 before_install:
   - |
-    if [[ "${TRAVIS_CPU_ARCH}" == "ppc64le" || "${TRAVIS_CPU_ARCH}" == "arm64" ]]; then
+    if [[ "${TRAVIS_CPU_ARCH}" == "ppc64le" || "${TRAVIS_CPU_ARCH}" == "arm64" || "${TRAVIS_CPU_ARCH}" == "s390x" ]]; then
       # fix cpu count to avoid OOM failure
       cat /proc/stat > /tmp/stat
       sed -i '/^cpu[4-9]/d' /tmp/stat
