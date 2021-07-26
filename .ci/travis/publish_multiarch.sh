@@ -36,7 +36,7 @@ for image in "${PUBLISH_IMAGES_LIST[@]}"
 
     if [[ "${TAG}" == "next-travis" ]]; then
        eval docker manifest create "${REGISTRY}/${image}:${SHORT_SHA}" $AMEND
-       docker manifest push "${REGISTRY}/${image}:${SHORT_SHA}""
+       docker manifest push "${REGISTRY}/${image}:${SHORT_SHA}"
     fi
 
 done

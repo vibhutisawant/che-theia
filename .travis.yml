@@ -94,7 +94,7 @@ jobs:
       - |
         set -e
         docker image prune -a -f
-        TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        SHA1_SUFFIX=travis-${TRAVIS_CPU_ARCH} TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     - <<: *build-and-push-next
       arch: s390x
       name: Build & Publish image on s390x
@@ -103,7 +103,7 @@ jobs:
       arch: s390x
       if: type = api AND branch = test-release AND env(TAG) = "next-travis"
       name: Publish multiarch image with next-travis tag
-      script: .ci/travis/publish_multiarch.sh
+      script: SHA1_SUFFIX=travis .ci/travis/publish_multiarch.sh
 
     - &check-a-theia-branch
       stage: Check a Theia branch
