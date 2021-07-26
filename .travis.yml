@@ -118,7 +118,7 @@ jobs:
       - |
         set -e
         docker image prune -a -f
-        travis_wait 30 TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     #- <<: *build-and-push-next
       name: Build & Publish image on arm64
       #arch: arm64
