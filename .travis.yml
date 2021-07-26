@@ -29,11 +29,6 @@ before_install:
       sed -i '/^cpu[0-9][0-9]/d' /tmp/stat
       sudo mount --bind /tmp/stat /proc/stat
     fi
-    # nvm --version
-    # node --version
-    # echo $NODE_VERSION
-    # nvm install 12.20.0
-    # node --version
 
 install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -123,7 +118,7 @@ jobs:
       - |
         set -e
         docker image prune -a -f
-        TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+        travis_wait 30 TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     #- <<: *build-and-push-next
       name: Build & Publish image on arm64
       #arch: arm64
