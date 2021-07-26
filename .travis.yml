@@ -18,7 +18,7 @@ services:
   - docker
 
 language: node_js
-node_js: "12"
+node_js: "12.20.0"
 
 before_install:
   - |
@@ -29,11 +29,11 @@ before_install:
       sed -i '/^cpu[0-9][0-9]/d' /tmp/stat
       sudo mount --bind /tmp/stat /proc/stat
     fi
-    nvm --version
-    node --version
-    echo $NODE_VERSION
-    nvm install 12.20.0
-    node --version
+    # nvm --version
+    # node --version
+    # echo $NODE_VERSION
+    # nvm install 12.20.0
+    # node --version
 
 install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
