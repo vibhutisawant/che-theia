@@ -23,8 +23,6 @@ SHORT_SHA=$(git rev-parse --short HEAD)
 for image in "${PUBLISH_IMAGES_LIST[@]}"
   do
     AMEND=""
-    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-amd64";
-    AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-arm64";
     AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-ppc64le";
     AMEND+=" --amend ${REGISTRY}/${image}:${TAG}-s390x";
 
@@ -35,10 +33,4 @@ for image in "${PUBLISH_IMAGES_LIST[@]}"
        eval docker manifest create "${REGISTRY}/${image}:latest" "$AMEND"
        docker manifest push "${REGISTRY}/${image}:latest"
     fi
-
-    if [[ "${TAG}" == "next-travis" ]]; then
-       eval docker manifest create "${REGISTRY}/${image}:${SHORT_SHA}" "$AMEND"
-       docker manifest push "${REGISTRY}/${image}:${SHORT_SHA}"
-    fi
-
-  done
+done
