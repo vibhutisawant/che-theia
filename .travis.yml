@@ -29,6 +29,7 @@ before_install:
       sed -i '/^cpu[0-9][0-9]/d' /tmp/stat
       sudo mount --bind /tmp/stat /proc/stat
     fi
+    apt-get update && apt-get install -y libsecret-1-dev
 install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
