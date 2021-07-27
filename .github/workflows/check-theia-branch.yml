@@ -47,7 +47,7 @@ jobs:
       run: |
         body="{
         \"request\":{
-        \"branch\":\"test-release\",
+        \"branch\":\"$GITHUB_REF\",
         \"config\": {
           \"env\": {
             \"global\": [
