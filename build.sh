@@ -19,7 +19,7 @@ yarn ${YARN_OPTS}
 if [[ -n "${TAG:-}" ]]; then
    if [[ -z "${THEIA_DOCKER_IMAGE_VERSION}" ]]; then
         IMAGE_TAG=$TAG
-        if [[ -z "${SHA1_SUFFIX}" ]]; then
+        if [[ -n "${SUFFIX:-}" ]]; then
           SHA1_SUFFIX=$SUFFIX
         fi
    else
