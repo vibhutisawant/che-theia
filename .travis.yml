@@ -90,7 +90,7 @@ jobs:
     - &build-and-push-next
       stage: Build & Publish 'next-travis'
       name: Build & Publish image on ppc64le 
-      if: type = api AND branch = test-release AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER)
+      if: type = api AND branch = test-release AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER) IS blank 
       arch: ppc64le
       script: 
       - |
@@ -102,7 +102,7 @@ jobs:
       name: Build & Publish image on s390x
 
     - stage: Publish multiarch image with 'next-travis' tag
-      if: type = api AND branch = test-release AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank 
+      if: type = api AND branch = test-release AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER) IS blank
       name: Publish multiarch image with next-travis tag
       script: SUFFIX=travis .ci/travis/publish_multiarch.sh
 
