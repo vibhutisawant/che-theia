@@ -89,7 +89,7 @@ jobs:
     - &build-and-push-next
       stage: Build & Publish 'next-travis'
       name: Build & Publish image on ppc64le 
-      if: type = api AND branch = test-release AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank 
+      if: type = api AND branch = test-release AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER)
       arch: ppc64le
       script: 
       - |
