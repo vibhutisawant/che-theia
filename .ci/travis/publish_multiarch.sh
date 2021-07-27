@@ -18,7 +18,7 @@ PUBLISH_IMAGES_LIST=(
   prabhav/che-theia-vsix-installer
 )
 
-SHORT_SHA=$(git rev-parse --short HEAD)-${SHA1_SUFFIX}
+SHORT_SHA=$(git rev-parse --short HEAD)-${SUFFIX}
 
 for image in "${PUBLISH_IMAGES_LIST[@]}"
   do
