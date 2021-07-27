@@ -47,7 +47,7 @@ jobs:
       run: |
         body="{
         \"request\":{
-        \"branch\":\"$CI_ACTION_REF_NAME\",
+        \"branch\":\"${GITHUB_REF##*/}\",
         \"config\": {
           \"env\": {
             \"global\": [
