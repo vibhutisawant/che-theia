@@ -18,4 +18,4 @@ RUN apk add --update --no-cache \
     # patch (required in che-theia to apply patches)
     patch \
     # requirements to run theia with yarn start
-    libsecret-dev
+    libsecret
