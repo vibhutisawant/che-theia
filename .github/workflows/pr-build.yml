@@ -27,7 +27,10 @@ jobs:
       with:
         node-version: '12.x'
     - name: build
-      run: yarn
+      run: |
+        sudo apt install libsecret-1-dev
+        yarn
+
     - name: Test Coverage
       uses: codecov/codecov-action@v1
   docker-build:

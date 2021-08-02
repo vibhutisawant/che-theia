@@ -42,6 +42,8 @@ jobs:
   fast_finish: true
   allow_failures:
    - if: env(PR_NUMBER) IS present
+     arch: arm64-graviton2
+   - if: env(PR_NUMBER) IS present
      arch: ppc64le
    - if: env(PR_NUMBER) IS present
      arch: s390x
@@ -100,6 +102,7 @@ jobs:
       name: Build & Publish image on s390x
 
     - stage: Publish multiarch image with 'next-travis' tag
+      arch: s390x
       if: type = api AND branch = test-release AND env(TAG) = "next-travis"
       name: Publish multiarch image with next-travis tag
       script: SUFFIX=travis .ci/travis/publish_multiarch.sh
@@ -138,6 +141,6 @@ jobs:
       name: Build and publish image on s390x
 
     - stage: Publish multiarch image 
-      arch: s390x
+      arch: amd64
       if: type = api AND env(TAG) IS present AND env(TAG) != "next-travis"
       script: .ci/travis/publish_multiarch.sh
