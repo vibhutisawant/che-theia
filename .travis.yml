@@ -42,10 +42,10 @@ jobs:
     - &node-build
       stage: PR Check
       name: Node Build on amd64
-      before_install: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       if: env(PR_NUMBER) IS present
       arch: ppc64le
       install:
+        - sudo apt-get update && sudo apt-get install -y libsecret-1-dev
         - git fetch origin +refs/pull/${PR_NUMBER}/merge
         - git checkout -qf FETCH_HEAD
       script: yarn
