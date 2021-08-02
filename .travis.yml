@@ -19,15 +19,6 @@ services:
 language: node_js
 node_js: "12.20.0"
 
-before_install:
-  - |
-    if [[ "${TRAVIS_CPU_ARCH}" == "ppc64le" ]]; then
-      # fix cpu count to avoid OOM failure
-      cat /proc/stat > /tmp/stat
-      sed -i '/^cpu[4-9]/d' /tmp/stat
-      sed -i '/^cpu[0-9][0-9]/d' /tmp/stat
-      sudo mount --bind /tmp/stat /proc/stat
-    fi
 install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker login quay.io -u="$QUAY_USERNAME " -p="$QUAY_PASSWORD"
@@ -50,7 +41,8 @@ jobs:
   include: 
     - &node-build
       stage: PR Check
-      name: Node Build on ppc64le
+      name: Node Build on amd64
+      before_install: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       if: env(PR_NUMBER) IS present
       arch: ppc64le
       install:
@@ -59,11 +51,11 @@ jobs:
         - git checkout -qf FETCH_HEAD
       script: yarn
     - <<: *node-build
-      name: Node Build on s390x
+      name: Node Build on ppc64le
       arch: s390x
     - &docker-build
       if: env(PR_NUMBER) IS present
-      name: Docker build (Alpine) on ppc64le
+      name: Docker build (Alpine) on amd64
       arch: ppc64le
       env: DIST=alpine
       install:
@@ -81,7 +73,7 @@ jobs:
       name: Docker build (Alpine) on s390x
       arch: s390x
     - <<: *docker-build
-      name: Docker build (ubi8) on ppc64le
+      name: Docker build (ubi8) on amd64
       arch: ppc64le
       env: DIST=ubi8
     - <<: *docker-build
@@ -91,28 +83,35 @@ jobs:
 
     - &build-and-push-next
       stage: Build & Publish 'next-travis'
-      name: Build & Publish image on ppc64le 
-      if: type = api AND branch = test-release AND env(TAG) = "next-travis"
-      arch: ppc64le
+      name: Build & Publish image on amd64 
+      if: type = api AND branch = test-release2 AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER) IS blank 
+      arch: amd64
       script: 
       - |
         set -e
         docker image prune -a -f
         SUFFIX=travis-${TRAVIS_CPU_ARCH} TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
     - <<: *build-and-push-next
+      arch: arm64-graviton2
+      group: edge
+      virt: vm
+      name: Build & Publish image on arm64
+    - <<: *build-and-push-next
+      arch: ppc64le
+      name: Build & Publish image on ppc64le
+    - <<: *build-and-push-next
       arch: s390x
       name: Build & Publish image on s390x
 
     - stage: Publish multiarch image with 'next-travis' tag
-      arch: s390x
-      if: type = api AND branch = test-release AND env(TAG) = "next-travis"
+      if: type = api AND branch = test-release2 AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER) IS blank
       name: Publish multiarch image with next-travis tag
       script: SUFFIX=travis .ci/travis/publish_multiarch.sh
 
     - &check-a-theia-branch
       stage: Check a Theia branch
-      name: Build an image against Theia branch on ppc64le
-      arch: ppc64le
+      name: Build an image against Theia branch on amd64
+      arch: amd64
       if: type = api AND env(THEIA_GITHUB_REPO) AND env(THEIA_BRANCH)
       script:
       - |
@@ -122,15 +121,23 @@ jobs:
         docker tag quay.io/prabhav/che-theia-dev:next-travis prabhav/che-theia-dev:next-travis
         TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --build-args:THEIA_GITHUB_REPO=${THEIA_GITHUB_REPO} --branch:${THEIA_BRANCH}
     - <<: *check-a-theia-branch
+      arch: arm64-graviton2
+      group: edge
+      virt: vm
+      name: Build an image against Theia branch on arm64
+    - <<: *check-a-theia-branch
+      arch: ppc64le
+      name: Build an image against Theia branch on ppc64le
+    - <<: *check-a-theia-branch
       arch: s390x
       name: Build an image against Theia branch on s390x
     
     #Release Workflow
     - &release-che-theia
       stage: Release che-theia
-      name: Build and publish image on ppc64le
+      name: Build and publish image on amd64
       if: type = api AND env(TAG) IS present AND env(TAG) != "next-travis"
-      arch: ppc64le
+      arch: amd64
       script:
       - |  
         BRANCH=${TAG%.*}.x
@@ -138,6 +145,14 @@ jobs:
         TAG=$TAG-travis
         docker image prune -a -f
         TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
+    - <<: *release-che-theia
+      arch: arm64-graviton2
+      group: edge
+      virt: vm
+      name: Build and publish image on arm64
+    - <<: *release-che-theia
+      arch: ppc64le
+      name: Build and publish image on ppc64le
     - <<: *release-che-theia
       arch: s390x
       name: Build and publish image on s390x
