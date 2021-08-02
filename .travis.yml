@@ -54,6 +54,7 @@ jobs:
       if: env(PR_NUMBER) IS present
       arch: ppc64le
       install:
+        - sudo free -h
         - git fetch origin +refs/pull/${PR_NUMBER}/merge
         - git checkout -qf FETCH_HEAD
       script: yarn
@@ -66,6 +67,7 @@ jobs:
       arch: ppc64le
       env: DIST=alpine
       install:
+        - sudo free -h
         - git fetch origin +refs/pull/${PR_NUMBER}/merge
         - git checkout -qf FETCH_HEAD
       script:
