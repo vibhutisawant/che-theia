@@ -42,6 +42,7 @@ jobs:
     - &node-build
       stage: PR Check
       name: Node Build on amd64
+      before_install: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       if: env(PR_NUMBER) IS present
       arch: ppc64le
       install:
@@ -49,7 +50,6 @@ jobs:
         - git checkout -qf FETCH_HEAD
       script: yarn
     - <<: *node-build
-      before_install: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
       name: Node Build on ppc64le
       arch: s390x
     - &docker-build
