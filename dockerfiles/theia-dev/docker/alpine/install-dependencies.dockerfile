@@ -20,4 +20,4 @@ RUN apk add --update --no-cache \
     # requirements to build keytar
     libsecret-dev \
     # requirements to run theia with yarn start
-    libsecret-dev
+    libsecret
