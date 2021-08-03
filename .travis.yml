@@ -20,7 +20,7 @@ language: node_js
 node_js: "12.20.0"
 
 before_install:
-- |
+  - |
     if [[ "${TRAVIS_CPU_ARCH}" == "ppc64le" ]]; then
       # fix cpu count to avoid OOM failure
       cat /proc/stat > /tmp/stat
