@@ -23,8 +23,8 @@ PUBLISH_IMAGES_LIST=(
 for image in "${PUBLISH_IMAGES_LIST[@]}"; do
     the_image="${REGISTRY}/${ORGANIZATION}/${image}"
     AMEND=""
-    AMEND+=" --amend ${the_image}:${TAG}-amd64";
-    AMEND+=" --amend ${the_image}:${TAG}-arm64";
+    #AMEND+=" --amend ${the_image}:${TAG}-amd64";
+    #AMEND+=" --amend ${the_image}:${TAG}-arm64";
     AMEND+=" --amend ${the_image}:${TAG}-ppc64le";
     AMEND+=" --amend ${the_image}:${TAG}-s390x";
 
