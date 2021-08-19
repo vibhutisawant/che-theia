@@ -48,6 +48,7 @@ jobs:
       run: |
         body="{
         \"request\":{
+        \"branch\":\"${GITHUB_REF##*/}\",
         \"config\": {
           \"env\": {
             \"global\": [
