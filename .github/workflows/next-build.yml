@@ -10,6 +10,7 @@
 name: Build & Publish `next`
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - test-1127
