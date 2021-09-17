@@ -29,8 +29,8 @@ install:
   # TODO when we're confident that sha-tagged travis-built images won't collide with GHA built ones, we can remove the -travis suffix here
   - export SHORT_SHA=$(git rev-parse --short HEAD)-travis
   - export GITHUB_TOKEN="$CHE_BOT_GITHUB_TOKEN"
-  - echo "$RH_CHE_AUTOMATION_DOCKERHUB_PASSWORD" | docker login -u "$RH_CHE_AUTOMATION_DOCKERHUB_USERNAME" --password-stdin
-  - echo "$QUAY_ECLIPSE_CHE_PASSWORD" | docker login quay.io -u "$QUAY_ECLIPSE_CHE_USERNAME" --password-stdin
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - echo "$QUAY_PASSWORD" | docker login quay.io -u "$QUAY_USERNAME" --password-stdin
 
 env: 
   global:
