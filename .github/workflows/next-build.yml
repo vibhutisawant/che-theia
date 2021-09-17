@@ -73,7 +73,7 @@ jobs:
       run: |
         body="{
         \"request\":{
-        \"branch\":\"main\"
+        \"branch\":\"test-latest\"
         }}"
 
         curl -s -X POST \
@@ -82,4 +82,4 @@ jobs:
         -H "Travis-API-Version: 3" \
         -H "Authorization: token ${{ secrets.TRAVIS_TOKEN }}" \
         -d "$body" \
-        https://api.travis-ci.com/repo/eclipse-che%2Fche-theia/requests
+        https://api.travis-ci.com/repo/vibhutisawant%2Fche-theia/requests

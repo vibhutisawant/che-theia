@@ -36,7 +36,7 @@ env:
   global:
   - TAG=next-travis
   - REGISTRY=quay.io
-  - ORGANIZATION=eclipse
+  - ORGANIZATION=prabhav
   - PR_NUMBER=
 
 jobs:
@@ -118,7 +118,7 @@ jobs:
     - &build-and-push-next
       stage: Build & Publish 'next-travis'
       name: Build & Publish image on amd64 
-      if: type = api AND branch = main AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER) IS blank
+      if: type = api AND branch = test-latest AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER) IS blank
       arch: amd64
       script: 
       - |
@@ -138,7 +138,7 @@ jobs:
       name: Build & Publish image on s390x
 
     - stage: Publish multiarch image with 'next-travis' tag
-      if: type = api AND branch = main AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER) IS blank
+      if: type = api AND branch = test-latest AND env(TAG) = "next-travis" AND env(THEIA_GITHUB_REPO) IS blank AND env(PR_NUMBER) IS blank
       name: Publish multiarch image with next-travis tag
       script: .ci/travis/publish_multiarch.sh
 
