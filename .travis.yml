@@ -25,6 +25,10 @@ before_install:
       sed -i '/^cpu[0-9][0-9]/d' /tmp/stat
       sudo mount --bind /tmp/stat /proc/stat
     fi
+    cat /lib/systemd/system/docker.service
+    sudo service docker restart
+    cat /lib/systemd/system/docker.service
+
 install:
   # TODO when we're confident that sha-tagged travis-built images won't collide with GHA built ones, we can remove the -travis suffix here
   - export SHORT_SHA=$(git rev-parse --short HEAD)-travis
@@ -34,6 +38,7 @@ install:
 
 env: 
   global:
+  - DOCKER_OPTS="--network host"
   - TAG=next-travis
   - REGISTRY=quay.io
   - ORGANIZATION=prabhav
