@@ -25,9 +25,14 @@ before_install:
       sed -i '/^cpu[0-9][0-9]/d' /tmp/stat
       sudo mount --bind /tmp/stat /proc/stat
     fi
+    docker ps -a
+    docker network inspect bridge -f "{{json .Containers }}"
+    docker network inspect host -f "{{json .Containers }}"
     cat /lib/systemd/system/docker.service
     sudo service docker restart
     cat /lib/systemd/system/docker.service
+    docker network inspect bridge -f "{{json .Containers }}"
+    docker network inspect host -f "{{json .Containers }}"
 
 install:
   # TODO when we're confident that sha-tagged travis-built images won't collide with GHA built ones, we can remove the -travis suffix here
