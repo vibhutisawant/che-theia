@@ -33,7 +33,6 @@ before_install:
     # cat /lib/systemd/system/docker.service
     # docker network inspect bridge -f "{{json .Containers }}"
     # docker network inspect host -f "{{json .Containers }}"
-    
 
 install:
   # TODO when we're confident that sha-tagged travis-built images won't collide with GHA built ones, we can remove the -travis suffix here
