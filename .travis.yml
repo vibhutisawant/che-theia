@@ -60,29 +60,21 @@ jobs:
   include: 
     - &node-build
       stage: PR Check
-      name: Node Build on amd64
+      name: Node Build on s390x
       if: env(PR_NUMBER) IS present
-      arch: amd64
+      arch: s390x
       install:
         - sudo apt-get update && sudo apt-get install -y libsecret-1-dev
         - git fetch origin +refs/pull/${PR_NUMBER}/merge
         - git checkout -qf FETCH_HEAD
       script: yarn
     - <<: *node-build
-      name: Node Build on arm64
-      arch: arm64-graviton2
-      group: edge
-      virt: vm
-    - <<: *node-build
       name: Node Build on ppc64le
       arch: ppc64le
-    - <<: *node-build
-      name: Node Build on s390x
-      arch: s390x
     - &docker-build
       if: env(PR_NUMBER) IS present
-      name: Docker build (Alpine) on amd64
-      arch: amd64
+      name: Docker build (Alpine) on s390x
+      arch: s390x
       env: DIST=alpine
       install:
         - git fetch origin +refs/pull/${PR_NUMBER}/merge
@@ -95,33 +87,15 @@ jobs:
         docker tag quay.io/eclipse/che-theia-dev:next-travis eclipse/che-theia-dev:next-travis || true
         TAG=$TAG-${TRAVIS_CPU_ARCH} ./build.sh --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.$DIST
     - <<: *docker-build
-      name: Docker build (Alpine) on arm64
-      arch: arm64-graviton2
-      group: edge
-      virt: vm
-    - <<: *docker-build
       name: Docker build (Alpine) on ppc64le
       arch: ppc64le
     - <<: *docker-build
-      name: Docker build (Alpine) on s390x
+      name: Docker build (ubi8) on s390x
       arch: s390x
-    - <<: *docker-build
-      name: Docker build (ubi8) on amd64
-      arch: amd64
-      env: DIST=ubi8
-    - <<: *docker-build
-      name: Docker build (ubi8) on arm64
-      arch: arm64-graviton2
-      group: edge
-      virt: vm
       env: DIST=ubi8
     - <<: *docker-build
       name: Docker build (ubi8) on ppc64le
       arch: ppc64le
-      env: DIST=ubi8
-    - <<: *docker-build
-      name: Docker build (ubi8) on s390x
-      arch: s390x
       env: DIST=ubi8
 
     - &build-and-push-next
