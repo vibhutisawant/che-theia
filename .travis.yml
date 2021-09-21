@@ -32,7 +32,6 @@ before_install:
     # sudo service docker restart
     # cat /lib/systemd/system/docker.service
     #
-    #
     # docker network inspect bridge -f "{{json .Containers }}"
     # docker network inspect host -f "{{json .Containers }}"
 
