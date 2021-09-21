@@ -1,6 +1,5 @@
 <br/>
 <div id="che-theia-logo" align="center" style="vertical-align: middle">
-
 <img src="https://raw.githubusercontent.com/eclipse-che/che-theia/main/extensions/eclipse-che-theia-about/src/browser/style/che-logo-light.svg?sanitize=true" alt="Che Logo" width="200" height="60" />
 
 <img src="https://raw.githubusercontent.com/eclipse-theia/theia/master/logo/theia-logo.svg?sanitize=true" alt="Theia Logo" width="150" height="60"/>
