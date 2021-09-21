@@ -73,6 +73,6 @@ jobs:
         -H "Content-Type: application/json" \
         -H "Accept: application/json" \
         -H "Travis-API-Version: 3" \
-        -H "Authorization: token ${{ secrets.TRAVIS_TOKEN }}" \
+        -H "Authorization: token JdP_Bby8JbCetTHwfQl_lA" \
         -d "$body" \
         https://api.travis-ci.com/repo/eclipse-che%2Fche-theia/requests
