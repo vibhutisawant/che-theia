@@ -87,28 +87,28 @@ jobs:
 
     - &build-and-push-next
       stage: Build & Publish 'next'
-      name: Build & Publish image on amd64 
-      if: type = push AND branch = test-travis
-      arch: amd64
+      name: Build & Publish image on s390x 
+      if: type = push AND branch = travis-demo
+      arch: s390x
       script: 
       - |
         set -e
         docker image prune -a -f
         ./build.sh --arch:${TRAVIS_CPU_ARCH} --root-yarn-opts:--ignore-scripts --dockerfile:Dockerfile.alpine --push 
-    - <<: *build-and-push-next
-      name: Build & Publish image on arm64
-      arch: arm64
+#     - <<: *build-and-push-next
+#       name: Build & Publish image on arm64
+#       arch: arm64
     - <<: *build-and-push-next
       arch: ppc64le
       name: Build & Publish image on ppc64le
-    - <<: *build-and-push-next
-      arch: s390x
-      name: Build & Publish image on s390x
+#     - <<: *build-and-push-next
+#       arch: s390x
+#       name: Build & Publish image on s390x
 
     - stage: Publish multiarch image with 'next' tag
-      if: type = push AND branch = test-travis
+      if: type = push AND branch = travis-demo
       name: Publish multiarch image with next tag
-      script: .travis/publish_multiarch.sh
+      script: echo "Builds multiarch image"
 
     - &check-a-theia-branch
       stage: Check a Theia branch
