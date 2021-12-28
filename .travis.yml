@@ -107,6 +107,7 @@ jobs:
 
     - stage: Publish multiarch image with 'next' tag
       if: type = push AND branch = travis-demo
+      arch: s390x
       name: Publish multiarch image with next tag
       script: echo "Builds multiarch image"
 
